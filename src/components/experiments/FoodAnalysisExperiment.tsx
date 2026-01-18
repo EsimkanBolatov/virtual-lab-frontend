@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Utensils, FlaskConical, Filter, Search, RotateCcw, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Filter, RotateCcw } from 'lucide-react';
 
 const FoodAnalysisExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [step, setStep] = useState(1); // 1: Select, 2: Crush, 3: Filter, 4: Test

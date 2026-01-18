@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Activity, ArrowDown } from 'lucide-react';
+import { RefreshCw, Activity } from 'lucide-react';
 
 const HClExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [volumeAdded, setVolumeAdded] = useState(0); // мл NaOH
@@ -8,8 +8,6 @@ const HClExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [ph, setPh] = useState(1); // Бастапқы pH (Күшті қышқыл)
   const [indicatorColor, setIndicatorColor] = useState('rgba(255, 255, 255, 0)'); // Мөлдір
   
-  // Константалар
-  const TOTAL_HCL = 20; // мл
   const EQUIVALENCE_POINT = 20; // 20 мл қосқанда бейтараптанады
 
   // Анимация және есептеу
@@ -29,7 +27,6 @@ const HClExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   // pH және Түс логикасы
   useEffect(() => {
     // Сигмоидты функция арқылы pH қисығын имитациялау
-    // Титрлеу қисығына ұқсас формула
     let currentPh = 1;
     if (volumeAdded < EQUIVALENCE_POINT) {
       currentPh = 1 + (volumeAdded / EQUIVALENCE_POINT) * 2; // Баяу өсу

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FlaskConical, Beaker, HelpCircle, Check, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 const IonRecognitionExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  // 1 = Cu, 2 = Zn (Рандом жасауға болады, қазірше бекітілген)
+  // 1 = Cu, 2 = Zn
   const [tubes, setTubes] = useState([
     { id: 1, type: 'Cu', reagentCount: 0, precipitate: 'none', dissolved: false },
     { id: 2, type: 'Zn', reagentCount: 0, precipitate: 'none', dissolved: false }
@@ -134,7 +134,6 @@ const IonRecognitionExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) 
   );
 };
 
-// Lucide icon fix for display purposes in this block
 const CheckCircle2 = Check; 
 
 export default IonRecognitionExperiment;
