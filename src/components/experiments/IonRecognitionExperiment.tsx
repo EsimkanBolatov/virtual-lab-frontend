@@ -1,148 +1,140 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FlaskConical, Plus, RefreshCw, CheckCircle2 } from 'lucide-react';
-
-type IonType = 'Cu' | 'Zn';
+import { FlaskConical, Beaker, HelpCircle, Check, X } from 'lucide-react';
 
 const IonRecognitionExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [selectedTube, setSelectedTube] = useState<IonType | null>(null);
-  const [reagentAdded, setReagentAdded] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  // 1 = Cu, 2 = Zn (Рандом жасауға болады, қазірше бекітілген)
+  const [tubes, setTubes] = useState([
+    { id: 1, type: 'Cu', reagentCount: 0, precipitate: 'none', dissolved: false },
+    { id: 2, type: 'Zn', reagentCount: 0, precipitate: 'none', dissolved: false }
+  ]);
+  
+  const [selectedTubeId, setSelectedTubeId] = useState<number | null>(null);
+  const [guessResult, setGuessResult] = useState<'correct' | 'wrong' | null>(null);
 
-  // Сброс
-  const resetExperiment = () => {
-    setSelectedTube(null);
-    setReagentAdded(false);
-    setShowResult(false);
+  const addReagent = (id: number) => {
+    setTubes(prev => prev.map(tube => {
+      if (tube.id !== id) return tube;
+      
+      const newCount = tube.reagentCount + 1;
+      let newPrecipitate = tube.precipitate;
+      let newDissolved = tube.dissolved;
+
+      // 1-ші тамшы: Тұнба түзіледі
+      if (newCount === 1) {
+        newPrecipitate = tube.type === 'Cu' ? 'blue' : 'white';
+      }
+      // 3-ші тамшы (Артық мөлшер): Zn ериді, Cu ерімейді
+      if (newCount >= 3) {
+        if (tube.type === 'Zn') {
+           newDissolved = true;
+           newPrecipitate = 'none'; // Тұнба жойылады
+        }
+      }
+
+      return { ...tube, reagentCount: newCount, precipitate: newPrecipitate, dissolved: newDissolved };
+    }));
   };
 
-  // Реакция нәтижесінің түсі
-  const getPrecipitateColor = () => {
-    if (!reagentAdded) return 'transparent';
-    if (selectedTube === 'Cu') return '#3b82f6'; // Көк (Cu(OH)2)
-    if (selectedTube === 'Zn') return '#ffffff'; // Ақ (Zn(OH)2)
-    return 'transparent';
+  const makeGuess = (ion: 'Cu' | 'Zn') => {
+    if (!selectedTubeId) return;
+    const tube = tubes.find(t => t.id === selectedTubeId);
+    if (tube?.type === ion) setGuessResult('correct');
+    else setGuessResult('wrong');
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto min-h-[500px]">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto min-h-[600px]">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">№6 Зертханалық тәжірибе</h2>
-          <p className="text-slate-500">Cu²⁺ және Zn²⁺ иондарын тану (Сапалық реакция)</p>
+          <p className="text-slate-500">Белгісіз иондарды анықтау (Cu²⁺ vs Zn²⁺)</p>
         </div>
         <button onClick={onBack} className="text-indigo-600 font-medium hover:underline">← Артқа</button>
       </div>
 
-      <div className="flex flex-col items-center">
-        
-        {/* Сынауықтарды таңдау */}
-        {!selectedTube ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center w-full">
-            <h3 className="text-xl font-semibold mb-6">Зерттеу үшін ерітіндіні таңдаңыз:</h3>
-            <div className="flex justify-center gap-10">
-              {['Cu', 'Zn'].map((ion, idx) => (
-                <button
-                  key={ion}
-                  onClick={() => setSelectedTube(ion as IonType)}
-                  className="group flex flex-col items-center p-6 bg-slate-50 border-2 border-slate-200 rounded-xl hover:border-indigo-500 transition-all"
-                >
-                  <div className="relative w-16 h-40 border-x-2 border-b-2 border-slate-300 rounded-b-full mb-4 bg-white overflow-hidden">
-                     {/* Бастапқы мөлдір сұйықтық */}
-                     <div className="absolute bottom-0 w-full h-1/3 bg-blue-50 opacity-50" />
-                  </div>
-                  <span className="font-bold text-slate-700">Сынауық №{idx + 1}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        ) : (
-          <div className="flex flex-col items-center w-full">
-            
-            {/* Тәжірибе аймағы */}
-            <div className="relative flex items-end justify-center h-64 w-full mb-8">
-              
-              {/* Негізгі Сынауық */}
-              <div className="relative w-24 h-64 border-x-4 border-b-4 border-slate-300 rounded-b-[3rem] bg-slate-50/50 overflow-hidden shadow-lg backdrop-blur-sm">
-                 {/* Сұйықтық */}
-                 <motion.div 
-                   className="absolute bottom-0 w-full"
-                   initial={{ height: "30%", backgroundColor: "#eff6ff" }}
-                   animate={{ 
-                     height: reagentAdded ? "60%" : "30%",
-                     backgroundColor: reagentAdded ? "#eff6ff" : "#eff6ff" 
-                   }}
-                   transition={{ duration: 1 }}
-                 />
-                 
-                 {/* Тұнба (Precipitate) */}
-                 {reagentAdded && (
-                   <motion.div 
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1, duration: 1 }}
-                      className="absolute bottom-0 w-full h-1/2 flex items-end justify-center pb-4"
-                   >
-                      {/* Тұнба бөлшектері */}
-                      <div className={`w-full h-full opacity-80 blur-sm flex flex-col-reverse items-center`} style={{ backgroundColor: getPrecipitateColor() }}>
-                        <div className="w-full h-4 bg-black/10 blur-md"></div>
-                      </div>
-                   </motion.div>
-                 )}
-              </div>
-
-              {/* NaOH қосу анимациясы */}
-              {!reagentAdded && (
-                 <motion.div 
-                   initial={{ opacity: 0, y: -50 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   className="absolute top-0 right-1/4"
-                 >
-                    <div className="flex flex-col items-center">
-                       <FlaskConical className="rotate-45 text-slate-600 mb-2" size={40} />
-                       <span className="font-bold text-slate-700">NaOH</span>
-                    </div>
-                 </motion.div>
-              )}
-            </div>
-
-            {/* Басқару */}
-            {!reagentAdded ? (
-              <button 
-                onClick={() => { setReagentAdded(true); setTimeout(() => setShowResult(true), 2500); }}
-                className="flex items-center gap-2 px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus size={24} /> NaOH қосу
-              </button>
-            ) : (
-               <div className="text-center">
-                  {showResult && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-slate-200 p-6 rounded-xl shadow-md max-w-md">
-                       <div className="flex items-center justify-center text-green-600 mb-2 gap-2">
-                          <CheckCircle2 /> <span className="font-bold text-lg">Нәтиже:</span>
-                       </div>
-                       <p className="text-slate-700 mb-2">
-                         Тұнба түсі: <strong>{selectedTube === 'Cu' ? 'Көк (Blue)' : 'Ақ (White)'}</strong>
-                       </p>
-                       <p className="text-sm text-slate-500 mb-4 font-mono bg-slate-100 p-2 rounded">
-                          {selectedTube === 'Cu' 
-                            ? 'Cu²⁺ + 2OH⁻ → Cu(OH)₂↓ (Көк тұнба)' 
-                            : 'Zn²⁺ + 2OH⁻ → Zn(OH)₂↓ (Ақ тұнба)'}
-                       </p>
-                       <button onClick={resetExperiment} className="flex items-center justify-center gap-2 w-full py-2 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200">
-                          <RefreshCw size={16} /> Қайтадан көру
-                       </button>
-                    </motion.div>
-                  )}
-               </div>
-            )}
-
-          </div>
-        )}
+      <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200 mb-8 text-yellow-800 text-sm">
+         <strong>Кеңес:</strong> NaOH қосқанда екеуінде де тұнба түзіледі. Бірақ NaOH <strong>артық мөлшерде</strong> қосқанда, біреуінің тұнбасы еріп кетеді (Амфотерлік қасиет).
       </div>
+
+      <div className="flex justify-center gap-16 mb-12">
+        {tubes.map(tube => (
+          <div key={tube.id} className="flex flex-col items-center">
+             {/* Сынауық */}
+             <div 
+               className={`relative w-20 h-56 border-x-4 border-b-4 border-slate-300 rounded-b-3xl overflow-hidden cursor-pointer transition-all ${selectedTubeId === tube.id ? 'ring-4 ring-indigo-300 shadow-xl scale-105' : 'hover:scale-105'}`}
+               onClick={() => { setSelectedTubeId(tube.id); setGuessResult(null); }}
+             >
+                {/* Сұйықтық фон */}
+                <div className="absolute bottom-0 w-full h-1/3 bg-blue-50/30"></div>
+                
+                {/* Тұнба визуализациясы */}
+                <motion.div 
+                  className="absolute bottom-0 w-full flex items-end justify-center"
+                  initial={{ height: 0 }}
+                  animate={{ height: tube.precipitate !== 'none' ? '40%' : '0%' }}
+                >
+                   {tube.precipitate === 'blue' && (
+                     <div className="w-full h-full bg-blue-500 opacity-80 blur-sm"></div>
+                   )}
+                   {tube.precipitate === 'white' && (
+                     <div className="w-full h-full bg-white opacity-90 blur-sm"></div>
+                   )}
+                </motion.div>
+
+                {/* Еріп кету эффектісі */}
+                {tube.dissolved && (
+                   <motion.div 
+                     initial={{ opacity: 0 }} 
+                     animate={{ opacity: 1 }} 
+                     className="absolute inset-0 flex items-center justify-center text-xs text-slate-500 font-bold"
+                   >
+                     Еріп кетті
+                   </motion.div>
+                )}
+             </div>
+             
+             {/* Батырмалар */}
+             <div className="mt-4 space-y-2 w-full">
+                <button 
+                  onClick={() => addReagent(tube.id)}
+                  className="w-full py-2 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-bold hover:bg-indigo-200 active:scale-95 transition"
+                >
+                  + NaOH қосу ({tube.reagentCount})
+                </button>
+                <div className="text-center font-bold text-slate-700">№{tube.id} Сынауық</div>
+             </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Жауап беру панелі */}
+      {selectedTubeId && (
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
+           <h3 className="text-lg font-bold text-slate-800 mb-4">№{selectedTubeId} сынауықта қандай ион бар деп ойлайсыз?</h3>
+           
+           {!guessResult ? (
+             <div className="flex justify-center gap-6">
+                <button onClick={() => makeGuess('Cu')} className="px-8 py-3 bg-white border-2 border-blue-500 text-blue-600 rounded-xl font-bold hover:bg-blue-50">
+                   Cu²⁺ (Мыс)
+                </button>
+                <button onClick={() => makeGuess('Zn')} className="px-8 py-3 bg-white border-2 border-slate-400 text-slate-600 rounded-xl font-bold hover:bg-slate-50">
+                   Zn²⁺ (Мырыш)
+                </button>
+             </div>
+           ) : (
+             <div className={`text-xl font-bold flex items-center justify-center gap-2 ${guessResult === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
+                {guessResult === 'correct' ? <CheckCircle2 size={32}/> : <X size={32}/>}
+                {guessResult === 'correct' ? 'Дұрыс! Жарайсыз!' : 'Қате! Тәжірибені мұқият қайталаңыз.'}
+             </div>
+           )}
+        </motion.div>
+      )}
     </div>
   );
 };
+
+// Lucide icon fix for display purposes in this block
+const CheckCircle2 = Check; 
 
 export default IonRecognitionExperiment;

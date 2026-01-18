@@ -1,341 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, RefreshCw, FlaskConical, Droplets, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { RefreshCw, Activity, ArrowDown } from 'lucide-react';
 
-// Проптардың интерфейсін қосамыз
-interface HClExperimentProps {
-  onBack: () => void;
-}
+const HClExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const [volumeAdded, setVolumeAdded] = useState(0); // мл NaOH
+  const [isFlowing, setIsFlowing] = useState(false);
+  const [ph, setPh] = useState(1); // Бастапқы pH (Күшті қышқыл)
+  const [indicatorColor, setIndicatorColor] = useState('rgba(255, 255, 255, 0)'); // Мөлдір
+  
+  // Константалар
+  const TOTAL_HCL = 20; // мл
+  const EQUIVALENCE_POINT = 20; // 20 мл қосқанда бейтараптанады
 
-// Типы для состояния эксперимента
-type Step = 'selection' | 'indicator' | 'titration' | 'result';
-type Indicator = 'litmus' | 'phenolphthalein' | null;
-
-// Компонентке { onBack } қабылдайтын мүмкіндік береміз
-const HClExperiment: React.FC<HClExperimentProps> = ({ onBack }) => {
-  const [step, setStep] = useState<Step>('selection');
-  const [indicator, setIndicator] = useState<Indicator>(null);
-  const [addedBaseVolume, setAddedBaseVolume] = useState(0); // 0 to 100
-  const [isReactionComplete, setIsReactionComplete] = useState(false);
-  const [liquidColor, setLiquidColor] = useState<string>('#e5e7eb'); // Default gray (water)
-
-  // Константы для логики реакции
-  const NEUTRALIZATION_POINT = 50; // Условный объем для нейтрализации
-
-  // Сброс эксперимента
-  const resetExperiment = () => {
-    setStep('selection');
-    setIndicator(null);
-    setAddedBaseVolume(0);
-    setIsReactionComplete(false);
-    setLiquidColor('#e5e7eb');
-  };
-
-  // Логика изменения цвета
+  // Анимация және есептеу
   useEffect(() => {
-    if (step === 'selection') return;
-
-    // 1. Исходный цвет кислоты (до титрования)
-    if (addedBaseVolume === 0) {
-      if (indicator === 'litmus') setLiquidColor('#ef4444'); // Красный (кислота)
-      else if (indicator === 'phenolphthalein') setLiquidColor('#ffffff'); // Бесцветный
-      else setLiquidColor('#e5e7eb'); // Прозрачный без индикатора
-      return;
+    let interval: any;
+    if (isFlowing && volumeAdded < 50) {
+      interval = setInterval(() => {
+        setVolumeAdded(prev => {
+          const newVal = prev + 0.2;
+          return newVal > 50 ? 50 : newVal;
+        });
+      }, 50);
     }
+    return () => clearInterval(interval);
+  }, [isFlowing, volumeAdded]);
 
-    // 2. В процессе титрования
-    if (addedBaseVolume < NEUTRALIZATION_POINT) {
-      // Все еще кислая среда
-      if (indicator === 'litmus') setLiquidColor('#ef4444');
-      else if (indicator === 'phenolphthalein') setLiquidColor('#ffffff');
+  // pH және Түс логикасы
+  useEffect(() => {
+    // Сигмоидты функция арқылы pH қисығын имитациялау
+    // Титрлеу қисығына ұқсас формула
+    let currentPh = 1;
+    if (volumeAdded < EQUIVALENCE_POINT) {
+      currentPh = 1 + (volumeAdded / EQUIVALENCE_POINT) * 2; // Баяу өсу
+    } else if (Math.abs(volumeAdded - EQUIVALENCE_POINT) < 1) {
+      currentPh = 7; // Секіріс
     } else {
-      // 3. Точка эквивалентности и щелочная среда
-      setIsReactionComplete(true);
-      if (indicator === 'litmus') setLiquidColor('#3b82f6'); // Синий
-      else if (indicator === 'phenolphthalein') setLiquidColor('#db2777'); // Малиновый
+      currentPh = 12 + (1 - Math.exp(-(volumeAdded - EQUIVALENCE_POINT) / 10)); // Сілтілік орта
     }
-  }, [addedBaseVolume, indicator, step]);
+    setPh(currentPh);
 
-  // Функция добавления капли
-  const addDrop = () => {
-    if (addedBaseVolume >= 100) return;
-    setAddedBaseVolume((prev) => Math.min(prev + 5, 100));
+    // Фенолфталеин түсі (pH > 8.2 болғанда күлгін бола бастайды)
+    if (currentPh > 8.2) {
+      const intensity = Math.min((currentPh - 8) / 4, 1);
+      setIndicatorColor(`rgba(236, 72, 153, ${intensity})`); // Pink-500
+    } else {
+      setIndicatorColor('rgba(255, 255, 255, 0.1)');
+    }
+  }, [volumeAdded]);
+
+  const reset = () => {
+    setVolumeAdded(0);
+    setPh(1);
+    setIsFlowing(false);
+    setIndicatorColor('rgba(255, 255, 255, 0)');
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[600px] bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-      
-      {/* HEADER: Заголовок и кнопка назад */}
-      <div className="absolute top-4 left-6 z-10">
-        <h2 className="text-xl font-bold text-slate-800">Лаб. №8: Нейтрализация кислоты</h2>
-        <p className="text-sm text-slate-500">7 сынып • Химия</p>
-      </div>
-      
-      {/* Кнопка АРТҚА (жоғарғы оң жақта) */}
-      <button 
-        onClick={onBack}
-        className="absolute top-4 right-6 z-10 text-slate-400 hover:text-indigo-600 transition-colors font-bold text-sm flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full border border-slate-200 hover:border-indigo-300"
-      >
-        ← Артқа
-      </button>
-
-      {/* Индикатор прогресса */}
-      <div className="flex gap-2 mb-8 mt-12 relative z-0">
-        {['Реагенттер', 'Индикатор', 'Тәжірибе', 'Нәтиже'].map((_, idx) => {
-          const steps: Step[] = ['selection', 'indicator', 'titration', 'result'];
-          const isActive = steps.indexOf(step) >= idx;
-          return (
-            <div key={idx} className={`h-2 w-16 rounded-full transition-colors ${isActive ? 'bg-indigo-600' : 'bg-slate-200'}`} />
-          );
-        })}
+    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-5xl mx-auto min-h-[600px] flex flex-col">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">№8 Зертханалық жұмыс</h2>
+          <p className="text-slate-500">Қышқылды бейтараптану реакциясы (Титрлеу)</p>
+        </div>
+        <button onClick={onBack} className="text-indigo-600 font-medium hover:underline">← Артқа</button>
       </div>
 
-      {/* Основная сцена */}
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-8 min-h-[400px] flex items-center justify-center relative z-0">
-        <AnimatePresence mode='wait'>
-          
-          {/* ШАГ 1: ВЫБОР РЕАГЕНТОВ */}
-          {step === 'selection' && (
-            <motion.div
-              key="selection"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center w-full"
-            >
-              <h3 className="text-2xl font-semibold mb-6">Реакцияға қажетті заттарды таңдаңыз</h3>
-              <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto">
-                <div 
-                  className="p-6 border-2 border-dashed border-indigo-200 rounded-xl bg-indigo-50 flex flex-col items-center cursor-pointer hover:border-indigo-500 transition-colors"
-                >
-                  <FlaskConical size={48} className="text-indigo-600 mb-2" />
-                  <span className="font-bold text-lg">HCl</span>
-                  <span className="text-sm text-slate-500">Тұз қышқылы</span>
-                </div>
-                <div 
-                  className="p-6 border-2 border-dashed border-rose-200 rounded-xl bg-rose-50 flex flex-col items-center cursor-pointer hover:border-rose-500 transition-colors"
-                >
-                  <FlaskConical size={48} className="text-rose-600 mb-2" />
-                  <span className="font-bold text-lg">NaOH</span>
-                  <span className="text-sm text-slate-500">Натрий гидроксиді</span>
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 flex-grow">
+        
+        {/* Сол жақ: Құрылғы (Бюретка + Колба) */}
+        <div className="bg-slate-50 rounded-2xl border border-slate-200 relative flex flex-col items-center justify-end p-8 overflow-hidden h-[500px]">
+           {/* Бюретка (NaOH) */}
+           <div className="absolute top-0 w-8 h-64 bg-slate-200 border-x border-slate-300 z-20">
+              <motion.div 
+                className="w-full bg-blue-200 absolute bottom-0"
+                style={{ height: `${100 - (volumeAdded * 2)}%` }} // Сұйықтық азаяды
+              />
+              <div className="absolute bottom-[-10px] left-[-10px] w-14 h-4 bg-slate-400 rounded cursor-pointer" onClick={() => setIsFlowing(!isFlowing)}>
+                 <div className={`w-2 h-6 bg-slate-600 mx-auto transition-transform ${isFlowing ? 'rotate-0' : 'rotate-90'}`}></div>
               </div>
-              <button
-                onClick={() => setStep('indicator')}
-                className="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 mx-auto"
+           </div>
+
+           {/* Тамшы */}
+           {isFlowing && (
+             <motion.div 
+               className="absolute top-64 w-3 h-3 bg-blue-300 rounded-full z-10"
+               animate={{ y: [0, 150], opacity: [1, 0] }}
+               transition={{ repeat: Infinity, duration: 0.3 }}
+             />
+           )}
+
+           {/* Колба (HCl + Индикатор) */}
+           <div className="relative w-48 h-56 z-10 mt-32">
+              <svg viewBox="0 0 200 240" className="drop-shadow-2xl">
+                <path d="M 70 0 L 70 80 L 10 240 L 190 240 L 130 80 L 130 0" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="4" />
+                <path d="M 72 0 L 72 80 L 12 238 L 188 238 L 128 80 L 128 0" fill="white" opacity="0.5" />
+                
+                {/* Сұйықтық түсі */}
+                <mask id="liquidMask">
+                   <path d="M 12 238 L 188 238 L 128 80 L 72 80 L 72 238 Z" fill="white" />
+                </mask>
+                <g mask="url(#liquidMask)">
+                   <rect x="0" y="100" width="200" height="140" fill={indicatorColor} className="transition-colors duration-300" />
+                   <rect x="0" y="100" width="200" height="140" fill="blue" fillOpacity="0.05" /> {/* HCl базалық түсі */}
+                </g>
+              </svg>
+              <div className="absolute bottom-4 left-0 right-0 text-center font-bold text-slate-500">HCl + Фенолфталеин</div>
+           </div>
+        </div>
+
+        {/* Оң жақ: Деректер және График */}
+        <div className="space-y-6">
+           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <div className="flex justify-between items-end mb-4">
+                 <div>
+                    <p className="text-slate-500 text-sm">Қосылған NaOH көлемі:</p>
+                    <p className="text-4xl font-bold text-blue-600">{volumeAdded.toFixed(1)} мл</p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-slate-500 text-sm flex items-center justify-end gap-1"><Activity size={16}/> pH деңгейі:</p>
+                    <p className={`text-4xl font-bold ${ph > 8 ? 'text-pink-500' : 'text-slate-700'}`}>{ph.toFixed(2)}</p>
+                 </div>
+              </div>
+
+              {/* Басқару түймесі */}
+              <button 
+                onClick={() => setIsFlowing(!isFlowing)}
+                className={`w-full py-3 rounded-xl font-bold text-lg transition-all ${isFlowing ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-600 hover:bg-green-200'}`}
               >
-                Келесі қадам <ArrowRight size={18} />
+                {isFlowing ? 'Тоқтату (Кранды жабу)' : 'Тамшылату (Кранды ашу)'}
               </button>
-            </motion.div>
-          )}
+           </div>
 
-          {/* ШАГ 2: ВЫБОР ИНДИКАТОРА */}
-          {step === 'indicator' && (
-            <motion.div
-              key="indicator"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="text-center w-full"
-            >
-              <h3 className="text-2xl font-semibold mb-6">Индикаторды таңдаңыз</h3>
-              <div className="flex justify-center gap-6">
-                <button
-                  onClick={() => { setIndicator('litmus'); setStep('titration'); }}
-                  className="group relative p-6 bg-white border-2 border-slate-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all w-48"
-                >
-                  <div className="h-16 w-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                    <div className="w-8 h-8 bg-red-500 rounded-full shadow-sm" />
-                  </div>
-                  <h4 className="font-bold text-slate-800">Лакмус</h4>
-                  <p className="text-xs text-slate-500 mt-1">Қышқылда қызыл түске енеді</p>
-                </button>
+           {/* Титрлеу қисығы */}
+           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 relative h-64">
+              <p className="text-xs font-bold text-slate-400 absolute top-2 left-2">pH Графигі</p>
+              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                 {/* Осьтер */}
+                 <line x1="0" y1="90" x2="100" y2="90" stroke="#cbd5e1" strokeWidth="1" />
+                 <line x1="10" y1="0" x2="10" y2="100" stroke="#cbd5e1" strokeWidth="1" />
+                 
+                 {/* Эквиваленттік нүкте сызығы */}
+                 <line x1="40" y1="0" x2="40" y2="100" stroke="#fca5a5" strokeWidth="0.5" strokeDasharray="2" />
+                 
+                 {/* Қисық сызу */}
+                 <motion.path
+                   fill="none"
+                   stroke="#6366f1"
+                   strokeWidth="2"
+                   d={`M 10 90 Q 25 88 38 85 L 40 40 L 42 15 Q 60 12 100 10`}
+                   strokeDasharray="1000"
+                   strokeDashoffset={1000 - (volumeAdded / 50) * 1000} // Анимация
+                 />
+                 
+                 {/* Ағымдағы нүкте */}
+                 <circle 
+                    cx={10 + (volumeAdded / 50) * 90} 
+                    cy={90 - ((ph - 1) / 13) * 80} 
+                    r="2" 
+                    fill="red" 
+                 />
+              </svg>
+              <div className="absolute bottom-1 right-2 text-xs text-slate-400">V (NaOH), мл</div>
+           </div>
 
-                <button
-                  onClick={() => { setIndicator('phenolphthalein'); setStep('titration'); }}
-                  className="group relative p-6 bg-white border-2 border-slate-200 rounded-xl hover:border-pink-500 hover:shadow-md transition-all w-48"
-                >
-                  <div className="h-16 w-16 bg-pink-100 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-pink-200 transition-colors">
-                    <div className="w-8 h-8 bg-pink-500 rounded-full shadow-sm opacity-20 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <h4 className="font-bold text-slate-800">Фенолфталеин</h4>
-                  <p className="text-xs text-slate-500 mt-1">Сілтіде таңқурай түсіне енеді</p>
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ШАГ 3 и 4: ТИТРОВАНИЕ (ОПЫТ) */}
-          {(step === 'titration' || step === 'result') && (
-            <motion.div
-              key="titration"
-              className="flex flex-col items-center w-full relative"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              {/* Бюретка (Верхняя часть) */}
-              <div className="relative mb-0 z-10 flex flex-col items-center">
-                <div className="w-4 h-32 bg-slate-200 border-x border-slate-300 relative rounded-t-sm">
-                   {/* Жидкость в бюретке */}
-                   <motion.div 
-                     className="absolute bottom-0 left-0 right-0 bg-slate-400 opacity-50"
-                     animate={{ height: `${100 - addedBaseVolume}%` }}
-                   />
-                </div>
-                <div className="w-6 h-4 bg-slate-300 rounded-sm flex items-center justify-center relative">
-                   {/* Краник */}
-                   <div className="w-8 h-1 bg-slate-600 absolute rotate-90" />
-                </div>
-                
-                {/* Анимация падающей капли */}
-                <AnimatePresence>
-                  {addedBaseVolume > 0 && !isReactionComplete && (
-                    <motion.div
-                      initial={{ y: -10, opacity: 1, scale: 0 }}
-                      animate={{ y: 120, opacity: 0, scale: 1 }}
-                      transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 0.5 }}
-                      className="absolute top-full w-3 h-4 bg-blue-200 rounded-full mt-1 drop-shadow-sm"
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Колба Эрленмейера (Нижняя часть) */}
-              <div className="relative mt-2">
-                <svg width="200" height="240" viewBox="0 0 200 240" className="drop-shadow-xl">
-                  {/* Стекло колбы */}
-                  <path 
-                    d="M 70 0 L 70 80 L 10 240 L 190 240 L 130 80 L 130 0" 
-                    fill="none" 
-                    stroke="rgba(0,0,0,0.2)" 
-                    strokeWidth="4" 
-                    strokeLinecap="round"
-                    className="z-20 relative"
-                  />
-                  {/* Жидкость внутри */}
-                  <mask id="liquidMask">
-                    <path d="M 72 0 L 72 80 L 12 238 L 188 238 L 128 80 L 128 0" fill="white" />
-                  </mask>
-                  
-                  {/* Анимированный уровень и цвет жидкости */}
-                  <g mask="url(#liquidMask)">
-                     <motion.rect
-                        x="0"
-                        y={240 - (60 + addedBaseVolume * 1.2)} // Уровень растет
-                        width="200"
-                        height="300"
-                        fill={liquidColor}
-                        className="transition-colors duration-700 ease-in-out"
-                        initial={{ y: 100 }}
-                        animate={{ y: 0 }}
-                     />
-                     {/* Пузырьки (декор) */}
-                     {isReactionComplete && (
-                        <>
-                           <motion.circle cx="100" cy="220" r="4" fill="white" opacity="0.4" animate={{ y: -100, opacity: 0 }} transition={{ repeat: Infinity, duration: 2 }} />
-                           <motion.circle cx="120" cy="230" r="3" fill="white" opacity="0.3" animate={{ y: -80, opacity: 0 }} transition={{ repeat: Infinity, duration: 2.5, delay: 0.5 }} />
-                        </>
-                     )}
-                  </g>
-                  
-                  {/* Блики на стекле */}
-                  <path d="M 150 220 Q 180 220 170 180" fill="none" stroke="white" strokeWidth="2" opacity="0.3" />
-                  <path d="M 30 220 Q 10 220 20 180" fill="none" stroke="white" strokeWidth="2" opacity="0.3" />
-                </svg>
-                
-                {/* Подпись вещества в колбе */}
-                <div className="absolute top-[60%] left-1/2 -translate-x-1/2 text-center pointer-events-none opacity-60">
-                    <span className="font-mono font-bold text-slate-700 mix-blend-multiply">HCl + Ind</span>
-                </div>
-              </div>
-
-              {/* Панель управления */}
-              <div className="mt-8 flex gap-4 z-20">
-                <button
-                  onClick={addDrop}
-                  disabled={isReactionComplete}
-                  className={`flex flex-col items-center gap-2 px-6 py-4 rounded-xl border-2 transition-all active:scale-95
-                    ${isReactionComplete 
-                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
-                      : 'bg-white border-indigo-100 hover:border-indigo-500 hover:shadow-lg hover:bg-indigo-50'}`}
-                >
-                  <Droplets className={isReactionComplete ? "text-slate-400" : "text-indigo-600"} />
-                  <span className="font-semibold text-sm">NaOH қосу (тамшылап)</span>
-                </button>
-              </div>
-
-              {/* РЕЗУЛЬТАТ / УРАВНЕНИЕ */}
-              <AnimatePresence>
-                {isReactionComplete && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="absolute -right-6 top-10 bg-white p-6 rounded-xl shadow-xl border border-green-100 max-w-xs z-50"
-                  >
-                    <div className="flex items-center gap-2 text-green-600 mb-2">
-                        <CheckCircle2 size={20} />
-                        <span className="font-bold">Реакция аяқталды!</span>
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-3">
-                        <p className="font-mono text-sm text-slate-800 text-center">
-                            HCl + NaOH <ArrowRight size={12} className="inline mx-1"/> NaCl + H₂O
-                        </p>
-                    </div>
-                    <p className="text-sm text-slate-600 leading-snug">
-                       Тұз қышқылы толығымен бейтараптанды. Ерітінді ортасы өзгеріп, индикатор түсін өзгертті.
-                    </p>
-                    <button 
-                       onClick={() => setStep('result')}
-                       className="w-full mt-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
-                    >
-                       Қорытынды жасау
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-
-          {/* ШАГ 4: ИТОГОВЫЙ ТЕСТ */}
-          {step === 'result' && (
-            <motion.div
-               key="result"
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="text-center max-w-lg"
-            >
-                <div className="bg-green-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle2 size={40} className="text-green-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-800 mb-2">Тәжірибе сәтті аяқталды!</h3>
-                <p className="text-slate-600 mb-8">
-                    Сіз бейтараптану реакциясын орындап, қышқыл мен сілтінің өзара әрекеттесуін бақыладыңыз.
-                </p>
-                
-                <div className="bg-white border border-slate-200 p-6 rounded-xl text-left mb-8 shadow-sm">
-                    <h4 className="font-semibold mb-4 text-slate-800">Тексеру сұрағы:</h4>
-                    <p className="text-sm text-slate-600 mb-4">Бейтараптану реакциясы нәтижесінде қандай заттар түзіледі?</p>
-                    <div className="space-y-2">
-                        {['Тұз және су', 'Қышқыл және оксид', 'Сілті және металл'].map((opt, i) => (
-                            <label key={i} className="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50">
-                                <input type="radio" name="quiz" className="w-4 h-4 text-indigo-600" />
-                                <span className="text-sm text-slate-700">{opt}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                <button
-                  onClick={resetExperiment}
-                  className="px-8 py-3 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition flex items-center gap-2 mx-auto"
-                >
-                  <RefreshCw size={18} />
-                  Қайтадан бастау
-                </button>
-            </motion.div>
-          )}
-
-        </AnimatePresence>
+           {ph > 8.2 && volumeAdded < 22 && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-green-100 text-green-800 p-4 rounded-xl flex items-center gap-2">
+                 <RefreshCw className="animate-spin-slow" />
+                 <span className="font-bold">Эквиваленттік нүктеге жеттіңіз! Реакция аяқталды.</span>
+              </motion.div>
+           )}
+           
+           <button onClick={reset} className="text-slate-400 hover:text-slate-600 text-sm mx-auto block">Тәжірибені қайта бастау</button>
+        </div>
       </div>
     </div>
   );
