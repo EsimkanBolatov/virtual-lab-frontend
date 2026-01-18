@@ -6,6 +6,8 @@ import HClExperiment from './components/experiments/HClExperiment';
 import SolutionPreparationExperiment from './components/experiments/SolutionPreparationExperiment';
 import MitosisExperiment from './components/experiments/MitosisExperiment';
 import IonRecognitionExperiment from './components/experiments/IonRecognitionExperiment'; // ЖАҢА
+import FoodAnalysisExperiment from './components/experiments/FoodAnalysisExperiment';
+import PhaseChangeExperiment from './components/experiments/PhaseChangeExperiment';
 
 // ============= TYPES =============
 interface User {
@@ -142,6 +144,8 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
     { id: 2, title: 'Ерітінділер дайындау', subject: 'chemistry', grade: 8, description: 'Пайыздық концентрациясы берілген ерітіндіні дайындау', type: 'practical', difficulty: 'medium', duration_minutes: 30 },
     { id: 3, title: 'Митозды зерттеу', subject: 'biology', grade: 9, description: 'Пияз тамыры жасушаларындағы митоз фазаларын микроскоппен қарау', type: 'lab', difficulty: 'hard', duration_minutes: 40 },
     { id: 4, title: 'Мыс пен мырыш иондарын тану', subject: 'chemistry', grade: 10, description: 'Cu²⁺, Zn²⁺ иондарына сапалық реакциялар', type: 'lab', difficulty: 'medium', duration_minutes: 25 },
+    { id: 5, title: 'Азық-түлік құрамын анықтау', subject: 'chemistry', grade: 7, description: 'Нәруыз, май және көмірсуларды анықтау', type: 'lab', difficulty: 'easy', duration_minutes: 25 },
+    { id: 6, title: 'Фазалық өзгерістер', subject: 'science', grade: 6, description: 'Судың агрегаттық күйлерінің өзгеруі', type: 'lab', difficulty: 'easy', duration_minutes: 15 },
   ];
 
   const filtered = selectedSubject ? experiments.filter(e => e.subject === selectedSubject) : experiments;
@@ -201,14 +205,17 @@ const App: React.FC = () => {
   };
 
   const renderExperiment = () => {
-    switch (selectedExperimentId) {
-      case 1: return <HClExperiment onBack={() => handleNavigate('experiments')} />;
-      case 2: return <SolutionPreparationExperiment onBack={() => handleNavigate('experiments')} />;
-      case 3: return <MitosisExperiment onBack={() => handleNavigate('experiments')} />;
-      case 4: return <IonRecognitionExperiment onBack={() => handleNavigate('experiments')} />;
-      default: return <div className="text-center p-10">Тәжірибе әзірленуде...</div>;
-    }
-  };
+  switch (selectedExperimentId) {
+    case 1: return <HClExperiment onBack={() => handleNavigate('experiments')} />;
+    case 2: return <SolutionPreparationExperiment onBack={() => handleNavigate('experiments')} />;
+    case 3: return <MitosisExperiment onBack={() => handleNavigate('experiments')} />;
+    case 4: return <IonRecognitionExperiment onBack={() => handleNavigate('experiments')} />;
+    // ЖАҢАЛАРЫ:
+    case 5: return <FoodAnalysisExperiment onBack={() => handleNavigate('experiments')} />;
+    case 6: return <PhaseChangeExperiment onBack={() => handleNavigate('experiments')} />;
+    default: return <div className="text-center p-10">Тәжірибе әзірленуде...</div>;
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
