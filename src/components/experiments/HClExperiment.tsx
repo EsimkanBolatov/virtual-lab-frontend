@@ -1,11 +1,28 @@
-import React, { useState, useEffect } from 'react';
+// frontend/src/components/experiments/HClExperiment.tsx
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const HClNeutralizationExperiment = () => {
+// Типтерді анықтау
+interface Chemical {
+  id: string;
+  name: string;
+  label: string;
+  color: string;
+}
+
+interface Indicator {
+  id: string;
+  name: string;
+  neutral: string;
+  acid: string;
+  base: string;
+}
+
+const HClExperiment = () => {
   const [step, setStep] = useState(1);
-  const [selectedAcid, setSelectedAcid] = useState(null);
-  const [selectedBase, setSelectedBase] = useState(null);
-  const [selectedIndicator, setSelectedIndicator] = useState(null);
+  const [selectedAcid, setSelectedAcid] = useState<Chemical | null>(null);
+  const [selectedBase, setSelectedBase] = useState<Chemical | null>(null);
+  const [selectedIndicator, setSelectedIndicator] = useState<Indicator | null>(null);
   const [beakerColor, setBeakerColor] = useState('transparent');
   const [showReaction, setShowReaction] = useState(false);
   const [score, setScore] = useState(0);
@@ -17,31 +34,31 @@ const HClNeutralizationExperiment = () => {
     acids: [
       { id: 'hcl', name: 'HCl', label: 'Тұз қышқылы', color: '#ffcccc' },
       { id: 'h2so4', name: 'H₂SO₄', label: 'Күкірт қышқылы', color: '#ffe6cc' }
-    ],
+    ] as Chemical[],
     bases: [
       { id: 'naoh', name: 'NaOH', label: 'Натрий гидроксиді', color: '#ccf2ff' },
       { id: 'koh', name: 'KOH', label: 'Калий гидроксиді', color: '#e6ccff' }
-    ],
+    ] as Chemical[],
     indicators: [
       { id: 'litmus', name: 'Лакмус', neutral: '#e8d5f2', acid: '#ff6b6b', base: '#4dabf7' },
       { id: 'phenol', name: 'Фенолфталеин', neutral: 'transparent', acid: 'transparent', base: '#ff6b9d' }
-    ]
+    ] as Indicator[]
   };
 
-  const handleChemicalSelect = (type, chemical) => {
+  const handleChemicalSelect = (type: 'acid' | 'base' | 'indicator', chemical: Chemical | Indicator) => {
     if (type === 'acid') {
-      setSelectedAcid(chemical);
-      showMessage('✓ Қышқыл таңдалды!', 'success');
+      setSelectedAcid(chemical as Chemical);
+      showMessage('✓ Қышқыл таңдалды!');
     } else if (type === 'base') {
-      setSelectedBase(chemical);
-      showMessage('✓ Сілті таңдалды!', 'success');
+      setSelectedBase(chemical as Chemical);
+      showMessage('✓ Сілті таңдалды!');
     } else if (type === 'indicator') {
-      setSelectedIndicator(chemical);
-      showMessage('✓ Индикатор таңдалды!', 'success');
+      setSelectedIndicator(chemical as Indicator);
+      showMessage('✓ Индикатор таңдалды!');
     }
   };
 
-  const showMessage = (msg, type) => {
+  const showMessage = (msg: string) => {
     setFeedbackMessage(msg);
     setShowFeedback(true);
     setTimeout(() => setShowFeedback(false), 2000);
@@ -49,7 +66,7 @@ const HClNeutralizationExperiment = () => {
 
   const mixChemicals = () => {
     if (!selectedAcid || !selectedBase) {
-      showMessage('⚠ Қышқыл мен сілтіді таңдаңыз!', 'error');
+      showMessage('⚠ Қышқыл мен сілтіді таңдаңыз!');
       return;
     }
 
@@ -57,16 +74,16 @@ const HClNeutralizationExperiment = () => {
       setScore(prev => prev + 50);
       setBeakerColor('#b3d9ff');
       setShowReaction(true);
-      showMessage('✓ Дұрыс! Бейтараптану реакциясы жүріп жатыр', 'success');
+      showMessage('✓ Дұрыс! Бейтараптану реакциясы жүріп жатыр');
       setTimeout(() => setStep(2), 2000);
     } else {
-      showMessage('✗ Тапсырма бойынша HCl және NaOH қажет', 'error');
+      showMessage('✗ Тапсырма бойынша HCl және NaOH қажет');
     }
   };
 
   const addIndicator = () => {
     if (!selectedIndicator) {
-      showMessage('⚠ Индикатор таңдаңыз!', 'error');
+      showMessage('⚠ Індикатор таңдаңыз!');
       return;
     }
 
@@ -74,18 +91,18 @@ const HClNeutralizationExperiment = () => {
       const color = selectedIndicator.neutral;
       setBeakerColor(color);
       setScore(prev => prev + 30);
-      showMessage('✓ Индикатор қосылды!', 'success');
+      showMessage('✓ Индикатор қосылды!');
       setTimeout(() => setStep(3), 1500);
     }
   };
 
-  const checkAnswer = (answer) => {
+  const checkAnswer = (answer: string) => {
     if (answer === 'nacl_h2o') {
       setScore(prev => prev + 20);
       setCompleted(true);
-      showMessage('🎉 Өте жақсы! Тест аяқталды!', 'success');
+      showMessage('🎉 Өте жақсы! Тест аяқталды!');
     } else {
-      showMessage('✗ Қате жауап. Қайта көріңіз', 'error');
+      showMessage('✗ Қате жауап. Қайта көріңіз');
     }
   };
 
@@ -330,4 +347,4 @@ const HClNeutralizationExperiment = () => {
   );
 };
 
-export default HClNeutralizationExperiment;
+export default HClExperiment;
