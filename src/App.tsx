@@ -19,6 +19,9 @@ import PhysicsProjectileExperiment from './components/experiments/PhysicsProject
 import PhysicsAccelerationExperiment from './components/experiments/PhysicsAccelerationExperiment';
 import PhysicsCalorimetryExperiment from './components/experiments/PhysicsCalorimetryExperiment';
 import PhysicsDiffractionExperiment from './components/experiments/PhysicsDiffractionExperiment';
+import PhysicsStokesExperiment from './components/experiments/PhysicsStokesExperiment';
+import PhysicsEMFExperiment from './components/experiments/PhysicsEMFExperiment';
+import PhysicsTransformerExperiment from './components/experiments/PhysicsTransformerExperiment';
 
 // ============= TYPES =============
 interface User {
@@ -524,6 +527,9 @@ const App: React.FC = () => {
       case 12: return <PhysicsCalorimetryExperiment onBack={() => handleNavigate('experiments')} />; // Мұз
       case 14: return <PhysicsAccelerationExperiment onBack={() => handleNavigate('experiments')} />; // Үдеу
       case 19: return <PhysicsDiffractionExperiment onBack={() => handleNavigate('experiments')} />; // Дифракция
+      case 16: return <PhysicsStokesExperiment onBack={() => handleNavigate('experiments')} />;
+      case 17: return <PhysicsEMFExperiment onBack={() => handleNavigate('experiments')} />;
+      case 18: return <PhysicsTransformerExperiment onBack={() => handleNavigate('experiments')} />;
       default: return (
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
            <div className="text-6xl mb-4">🚧</div>
