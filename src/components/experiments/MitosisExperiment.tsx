@@ -1,103 +1,157 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ScanEye } from 'lucide-react'; // Microscope алынып тасталды
+import { Play, Pause, SkipBack, SkipForward, Info } from 'lucide-react';
 
 const MitosisExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [magnification, setMagnification] = useState(10); // 10x, 40x, 100x
-  const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
-  
-  // Қарапайым SVG жасушалар симуляциясы
-  const cells = [
-    { id: 1, x: 80, y: 80, phase: 'Интерфаза', color: '#e2e8f0' },
-    { id: 2, x: 150, y: 120, phase: 'Профаза', color: '#fca5a5' }, // Хромосомалар жиырылуы
-    { id: 3, x: 220, y: 90, phase: 'Метафаза', color: '#fde047' }, // Ортаға тізілу
-    { id: 4, x: 100, y: 200, phase: 'Анафаза', color: '#86efac' }, // Екі жаққа тартылу
-    { id: 5, x: 200, y: 180, phase: 'Телофаза', color: '#93c5fd' }, // Екі ядро
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const phases = [
+    { name: 'Интерфаза', desc: 'ДНҚ екі еселенеді, жасуша өседі.', chromosomes: 1 },
+    { name: 'Профаза', desc: 'Хромосомалар ширатылып, ядро қабығы жойылады.', chromosomes: 1, condense: true },
+    { name: 'Метафаза', desc: 'Хромосомалар жасушаның ортасына (экваторға) тізіледі.', chromosomes: 1, align: true },
+    { name: 'Анафаза', desc: 'Хроматидтер екі полюске ажырайды.', chromosomes: 2, split: true },
+    { name: 'Телофаза', desc: 'Екі жаңа ядро түзіледі, цитоплазма бөлінеді.', chromosomes: 2, divide: true },
   ];
+
+  // Автоматты ойнату
+  React.useEffect(() => {
+    let interval: any;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setPhaseIndex((prev) => {
+          if (prev >= phases.length - 1) {
+            setIsPlaying(false);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  const currentPhase = phases[phaseIndex];
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">№9 Зертханалық жұмыс</h2>
-          <p className="text-slate-500">Пияз тамыр ұшындағы жасушалардан митозды зерттеу</p>
+          <p className="text-slate-500">Митоз процесінің интерактивті анимациясы</p>
         </div>
         <button onClick={onBack} className="text-indigo-600 font-medium hover:underline">← Артқа</button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Микроскоп панелі */}
-        <div className="col-span-2 relative">
-          <div className="aspect-square bg-slate-900 rounded-full overflow-hidden border-8 border-slate-700 relative shadow-inner">
-            <motion.div 
-              className="w-full h-full relative bg-pink-50"
-              animate={{ scale: magnification / 10 }}
-              transition={{ duration: 0.5 }}
-            >
-              {/* Тор көздер (сетка) симуляциясы */}
-              <div className="absolute inset-0 opacity-10" 
-                   style={{ backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', backgroundSize: '20px 20px' }} 
-              />
-              
-              {/* Жасушалар */}
-              {cells.map(cell => (
-                <motion.div
-                  key={cell.id}
-                  whileHover={{ scale: 1.1, border: "2px solid blue" }}
-                  onClick={() => setSelectedPhase(cell.phase)}
-                  className="absolute w-16 h-16 rounded-full border border-slate-300 flex items-center justify-center cursor-pointer shadow-sm"
-                  style={{ left: cell.x, top: cell.y, backgroundColor: cell.color }}
-                >
-                  <div className="text-[8px] text-slate-600 opacity-50">Cell {cell.id}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-            
-            {/* Окуляр эффектісі */}
-            <div className="absolute inset-0 pointer-events-none rounded-full shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
-          </div>
-          
-          <div className="mt-4 flex justify-center gap-4">
-             {[10, 40, 100].map(zoom => (
-               <button 
-                 key={zoom}
-                 onClick={() => setMagnification(zoom)}
-                 className={`px-4 py-2 rounded-lg font-bold transition-all ${magnification === zoom ? 'bg-indigo-600 text-white' : 'bg-slate-200 hover:bg-slate-300'}`}
-               >
-                 {zoom}x
-               </button>
-             ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Визуализация (Жасуша) */}
+        <div className="col-span-2 bg-slate-900 rounded-3xl aspect-video relative overflow-hidden flex items-center justify-center border-4 border-slate-700 shadow-inner">
+           {/* Микроскоп торы */}
+           <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
 
-        {/* Ақпарат панелі */}
-        <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <ScanEye className="text-indigo-600"/> Бақылау
-          </h3>
-          <p className="text-sm text-slate-600 mb-6">
-            Микроскопты қолданып, жасушаларды ұлғайтыңыз. Фазасын анықтау үшін жасушаны басыңыз.
-          </p>
+           {/* Жасуша мембранасы */}
+           <motion.div 
+             className="relative bg-pink-100/10 border-4 border-pink-300 rounded-full flex items-center justify-center backdrop-blur-sm"
+             animate={{ 
+               width: currentPhase.divide ? 500 : 300, 
+               height: 300,
+               borderRadius: currentPhase.divide ? "100px" : "50%" 
+             }}
+             transition={{ duration: 1 }}
+           >
+              {/* Хромосомалар */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                 {/* Сол жақ хромосомалар */}
+                 <motion.div 
+                   className="absolute flex flex-col gap-2"
+                   animate={{ 
+                     x: currentPhase.split ? -100 : (currentPhase.align ? 0 : -20),
+                     rotate: currentPhase.condense ? 0 : 45,
+                     opacity: currentPhase.divide ? 0.5 : 1
+                   }}
+                   transition={{ duration: 1.5, type: "spring" }}
+                 >
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-4 h-12 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>
+                    ))}
+                 </motion.div>
 
-          <div className="space-y-4">
-            <div className="p-4 bg-white rounded-lg shadow-sm border border-slate-200 min-h-[100px] flex flex-col justify-center items-center text-center">
-              {selectedPhase ? (
-                <>
-                  <span className="text-xs text-slate-400 uppercase tracking-wider">Анықталған фаза</span>
-                  <span className="text-2xl font-bold text-indigo-600 mt-1">{selectedPhase}</span>
-                </>
-              ) : (
-                <span className="text-slate-400">Жасушаны таңдаңыз...</span>
+                 {/* Оң жақ хромосомалар (Анафазада пайда болады) */}
+                 {(currentPhase.split || currentPhase.align || currentPhase.condense) && (
+                   <motion.div 
+                     className="absolute flex flex-col gap-2"
+                     animate={{ 
+                       x: currentPhase.split ? 100 : (currentPhase.align ? 0 : 20),
+                       rotate: currentPhase.condense ? 0 : -45,
+                       opacity: currentPhase.divide ? 0.5 : 1
+                     }}
+                     transition={{ duration: 1.5, type: "spring" }}
+                   >
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="w-4 h-12 bg-red-500 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.8)]"></div>
+                      ))}
+                   </motion.div>
+                 )}
+              </div>
+
+              {/* Бөліну сызығы (Телофаза) */}
+              {currentPhase.divide && (
+                <motion.div 
+                  initial={{ height: 0 }} 
+                  animate={{ height: "100%" }} 
+                  className="w-2 bg-slate-700/50 absolute"
+                />
               )}
-            </div>
-            
-            {selectedPhase === 'Метафаза' && (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-sm text-green-700 bg-green-50 p-3 rounded">
-                ✅ Дұрыс! Хромосомалар экваторға тізілген.
-              </motion.div>
-            )}
-          </div>
+           </motion.div>
+
+           {/* Фаза атауы (overlay) */}
+           <div className="absolute top-6 left-6 bg-black/60 px-4 py-2 rounded-lg text-white font-mono border-l-4 border-indigo-500">
+              {currentPhase.name}
+           </div>
         </div>
+
+        {/* Басқару панелі */}
+        <div className="flex flex-col justify-between h-full space-y-6">
+           <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 flex-1">
+              <div className="flex items-start gap-3 mb-4">
+                 <Info className="text-indigo-600 mt-1" />
+                 <div>
+                    <h3 className="font-bold text-indigo-900 text-lg">{currentPhase.name}</h3>
+                    <p className="text-indigo-700 leading-relaxed mt-2">{currentPhase.desc}</p>
+                 </div>
+              </div>
+              <div className="mt-6 flex gap-2 flex-wrap">
+                 <span className="bg-white px-3 py-1 rounded text-xs font-bold text-slate-500 border">ДНҚ</span>
+                 <span className="bg-white px-3 py-1 rounded text-xs font-bold text-slate-500 border">Ядро</span>
+                 <span className="bg-white px-3 py-1 rounded text-xs font-bold text-slate-500 border">Центриоль</span>
+              </div>
+           </div>
+
+           <div className="bg-slate-100 p-6 rounded-2xl border border-slate-200">
+              <div className="flex justify-between items-center mb-4 text-slate-600 font-medium">
+                 <span>Уақыт шкаласы</span>
+                 <span>{phaseIndex + 1} / {phases.length}</span>
+              </div>
+              
+              {/* Прогресс бар */}
+              <div className="w-full bg-slate-300 h-2 rounded-full mb-6 overflow-hidden">
+                 <motion.div 
+                   className="h-full bg-indigo-600"
+                   animate={{ width: `${((phaseIndex + 1) / phases.length) * 100}%` }}
+                 />
+              </div>
+
+              <div className="flex justify-center gap-4">
+                 <button onClick={() => { setIsPlaying(false); setPhaseIndex(Math.max(0, phaseIndex - 1)); }} className="p-3 bg-white rounded-full shadow hover:bg-slate-50 text-slate-700"><SkipBack size={24}/></button>
+                 <button onClick={() => setIsPlaying(!isPlaying)} className={`p-4 rounded-full shadow-lg text-white transition-all hover:scale-105 ${isPlaying ? 'bg-red-500' : 'bg-indigo-600'}`}>
+                    {isPlaying ? <Pause size={28} fill="white"/> : <Play size={28} fill="white" className="ml-1"/>}
+                 </button>
+                 <button onClick={() => { setIsPlaying(false); setPhaseIndex(Math.min(phases.length - 1, phaseIndex + 1)); }} className="p-3 bg-white rounded-full shadow hover:bg-slate-50 text-slate-700"><SkipForward size={24}/></button>
+              </div>
+           </div>
+        </div>
+
       </div>
     </div>
   );
