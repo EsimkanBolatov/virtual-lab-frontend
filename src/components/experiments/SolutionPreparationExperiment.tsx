@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Beaker, Scale, Droplets, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Droplets, CheckCircle2 } from 'lucide-react'; // Артық импорттар жойылды
 
 const SolutionPreparationExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [step, setStep] = useState(1);

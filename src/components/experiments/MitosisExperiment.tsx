@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ScanEye, Microscope } from 'lucide-react';
+import { ScanEye } from 'lucide-react'; // Microscope алынып тасталды
 
 const MitosisExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [magnification, setMagnification] = useState(10); // 10x, 40x, 100x
