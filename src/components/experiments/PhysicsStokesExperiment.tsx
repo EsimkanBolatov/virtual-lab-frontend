@@ -1,115 +1,241 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Droplets, Play, RotateCcw } from 'lucide-react'; // Timer алынып тасталды
+import { Play, RotateCcw, ZoomIn, ArrowDown, ArrowUp, Activity } from 'lucide-react';
 
 const PhysicsStokesExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [liquid, setLiquid] = useState('water');
+  const [liquidType, setLiquidType] = useState<'water' | 'oil' | 'glycerin'>('oil');
   const [isDropping, setIsDropping] = useState(false);
+  const [ballY, setBallY] = useState(0); // 0-100%
   const [time, setTime] = useState(0);
-  const [finished, setFinished] = useState(false);
+  const [velocity, setVelocity] = useState(0);
+  const [graphData, setGraphData] = useState<{t: number, v: number}[]>([]);
+  
+  // Түзетілді: Бастапқы мән 0 берілді
+  const requestRef = useRef<number>(0);
 
-  // Тұтқырлық коэффициенттері (шартты бірлік)
+  // Физикалық параметрлер
   const liquids = {
-    water: { name: 'Су', viscosity: 1, color: 'bg-blue-200/50', speed: 2 }, // Жылдам
-    oil: { name: 'Өсімдік майы', viscosity: 50, color: 'bg-yellow-200/60', speed: 4 }, // Орташа
-    glycerin: { name: 'Глицерин', viscosity: 1000, color: 'bg-slate-200/70', speed: 8 }, // Баяу
+    water: { name: 'Су', eta: 0.001, rho: 1000, color: 'bg-blue-200/40', bubbleColor: 'bg-blue-100' },
+    oil: { name: 'Май', eta: 0.1, rho: 900, color: 'bg-yellow-200/60', bubbleColor: 'bg-yellow-100' },
+    glycerin: { name: 'Глицерин', eta: 1.5, rho: 1260, color: 'bg-slate-200/80', bubbleColor: 'bg-white' },
   };
 
-  const currentLiquid = liquids[liquid as keyof typeof liquids];
+  const ballRadius = 0.005; // 5mm
+  const ballRho = 7800; // Steel
+  const g = 9.8;
+  const cylinderHeight = 0.5; // 50cm
+
+  // Анимация циклі
+  const animate = (prevTime: number) => {
+    const now = performance.now();
+    const dt = (now - prevTime) / 1000; // seconds
+
+    if (dt > 0) {
+      const currentLiquid = liquids[liquidType];
+      
+      const V_ball = (4/3) * Math.PI * Math.pow(ballRadius, 3);
+      const m = ballRho * V_ball;
+      
+      const F_gravity = m * g;
+      const F_buoyancy = currentLiquid.rho * g * V_ball;
+      
+      // Түзетілді: v_prev алынып тасталды, өйткені төменде prevV қолданылады
+      
+      setVelocity(prevV => {
+        const F_drag = 6 * Math.PI * currentLiquid.eta * ballRadius * prevV;
+        const a = (F_gravity - F_buoyancy - F_drag) / m;
+        const newV = prevV + a * dt;
+        
+        setBallY(prevY => {
+           const dy = newV * dt; // meters
+           const newY = prevY + (dy / cylinderHeight) * 100; // percent
+           if (newY >= 100) {
+             setIsDropping(false);
+             return 100;
+           }
+           return newY;
+        });
+
+        setTime(prevT => {
+           const newT = prevT + dt;
+           if (prevT * 1000 % 100 < 20) { // Графикті тым жиі жаңартпау үшін
+              setGraphData(prevG => [...prevG, { t: newT, v: newV }]);
+           }
+           return newT;
+        });
+
+        return newV;
+      });
+    }
+
+    if (ballY < 100) {
+       requestRef.current = requestAnimationFrame(() => animate(now));
+    }
+  };
 
   useEffect(() => {
-    let interval: any;
-    if (isDropping && !finished) {
-      const startTime = Date.now();
-      interval = setInterval(() => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        setTime(elapsed);
-      }, 50);
-      
-      // Анимация ұзақтығы сұйықтыққа байланысты
-      setTimeout(() => {
-        setFinished(true);
-        clearInterval(interval);
-      }, currentLiquid.speed * 1000);
+    if (isDropping) {
+      const startTime = performance.now();
+      requestRef.current = requestAnimationFrame(() => animate(startTime));
+    } else {
+      cancelAnimationFrame(requestRef.current);
     }
-    return () => clearInterval(interval);
-  }, [isDropping, currentLiquid]);
+    return () => cancelAnimationFrame(requestRef.current);
+  }, [isDropping]);
 
   const reset = () => {
     setIsDropping(false);
-    setFinished(false);
+    setBallY(0);
     setTime(0);
+    setVelocity(0);
+    setGraphData([]);
   };
 
+  const currentL = liquids[liquidType];
+
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto min-h-[600px]">
+    <div className="bg-white rounded-2xl shadow-xl p-6 max-w-6xl mx-auto min-h-[650px] flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Физика. №1 Зертханалық жұмыс (10-сынып)</h2>
-          <p className="text-slate-500">Стокс заңы: Тұтқырлықты анықтау</p>
+           <h2 className="text-2xl font-bold text-slate-800">Стокс заңы: Тұтқырлықты анықтау</h2>
+           <p className="text-slate-500">Күштер теңгерімі және шектік жылдамдық</p>
         </div>
-        <button onClick={onBack} className="text-indigo-600 font-medium hover:underline">← Артқа</button>
+        <button onClick={onBack} className="text-indigo-600 font-medium hover:bg-indigo-50 px-4 py-2 rounded-lg">← Артқа</button>
       </div>
 
-      <div className="grid grid-cols-2 gap-12">
-        <div className="flex justify-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+        
+        {/* Сол жақ: Цилиндр және Күштер */}
+        <div className="lg:col-span-4 flex justify-center gap-8">
            {/* Цилиндр */}
-           <div className={`w-32 h-[400px] border-4 border-slate-300 rounded-b-3xl relative overflow-hidden ${currentLiquid.color}`}>
-              {/* Шар */}
-              <motion.div 
-                className="absolute left-1/2 -translate-x-1/2 w-6 h-6 bg-slate-800 rounded-full shadow-lg"
-                initial={{ top: '10px' }}
-                animate={isDropping ? { top: '380px' } : { top: '10px' }}
-                transition={{ duration: currentLiquid.speed, ease: "linear" }}
-              />
-              {/* Белгілер */}
-              <div className="absolute top-10 w-full h-px bg-slate-400/50"></div>
-              <div className="absolute bottom-10 w-full h-px bg-slate-400/50"></div>
-              <div className="absolute right-2 top-1/2 -rotate-90 text-xs text-slate-500">S = 50 см</div>
-           </div>
-        </div>
+           <div className="relative w-40 h-[500px]">
+              <div className={`absolute inset-0 border-x-4 border-b-4 border-slate-300 rounded-b-3xl overflow-hidden backdrop-blur-sm ${currentL.color}`}>
+                 {/* Көпіршіктер анимациясы */}
+                 <div className="absolute inset-0 opacity-30">
+                    {[...Array(5)].map((_,i) => (
+                       <motion.div 
+                         key={i}
+                         className={`absolute w-2 h-2 rounded-full ${currentL.bubbleColor}`}
+                         animate={{ y: [500, 0], opacity: [0, 1, 0] }}
+                         transition={{ duration: 2 + i, repeat: Infinity, ease: "linear" }}
+                         style={{ left: `${20 + i * 15}%` }}
+                       />
+                    ))}
+                 </div>
 
-        <div className="space-y-8">
-           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-              <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><Droplets size={20}/> Сұйықтықты таңдаңыз:</h3>
-              <div className="flex gap-2">
-                 {Object.entries(liquids).map(([key, val]) => (
-                    <button 
-                      key={key} 
-                      onClick={() => { setLiquid(key); reset(); }}
-                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition ${liquid === key ? 'bg-indigo-600 text-white' : 'bg-white border hover:bg-slate-100'}`}
-                    >
-                       {val.name}
-                    </button>
+                 {/* Шар */}
+                 <div 
+                   className="absolute left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-900 rounded-full shadow-xl z-20 flex items-center justify-center"
+                   style={{ top: `${ballY}%`, transform: 'translate(-50%, -50%)' }}
+                 >
+                    {/* Векторлар */}
+                    {isDropping && (
+                       <>
+                          <div className="absolute top-full w-0.5 h-12 bg-red-500 origin-top">
+                             <ArrowDown size={12} className="absolute -bottom-3 -left-[5px] text-red-500"/>
+                             <span className="absolute left-2 top-4 text-[10px] font-bold text-red-600">mg</span>
+                          </div>
+                          <div className="absolute bottom-full w-0.5 bg-blue-500 origin-bottom" style={{ height: '20px' }}>
+                             <ArrowUp size={12} className="absolute -top-3 -left-[5px] text-blue-500"/>
+                          </div>
+                          <div className="absolute bottom-full w-0.5 bg-green-500 origin-bottom" style={{ height: `${Math.min(60, velocity * 40)}px` }}>
+                             <ArrowUp size={12} className="absolute -top-3 -left-[5px] text-green-500"/>
+                             <span className="absolute right-2 bottom-4 text-[10px] font-bold text-green-600">Fc</span>
+                          </div>
+                       </>
+                    )}
+                 </div>
+                 
+                 {[...Array(6)].map((_, i) => (
+                    <div key={i} className="absolute right-0 w-4 h-px bg-slate-500/50" style={{ top: `${i * 20}%` }}>
+                       <span className="absolute right-5 -top-2 text-[10px] text-slate-500">{i * 10}см</span>
+                    </div>
                  ))}
               </div>
            </div>
 
-           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className="w-16 h-16 bg-slate-800 text-green-400 font-mono text-xl flex items-center justify-center rounded-full border-4 border-slate-600">
-                 {time.toFixed(2)}с
+           {/* Микроскоп */}
+           <div className="hidden md:flex flex-col items-center justify-center gap-2">
+              <div className="w-32 h-32 rounded-full border-4 border-slate-800 overflow-hidden relative shadow-2xl bg-white">
+                 <div className={`absolute inset-0 ${currentL.color} opacity-50`}></div>
+                 <div className="absolute inset-0 flex flex-col justify-center items-center gap-2">
+                    {[...Array(5)].map((_,i) => (
+                       <motion.div 
+                         key={i}
+                         className="w-full h-px bg-slate-600/30"
+                         animate={isDropping ? { y: [0, 10] } : {}}
+                         transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
+                       />
+                    ))}
+                 </div>
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-slate-800 rounded-full z-10"></div>
+                 </div>
+                 <div className="absolute bottom-2 right-2 text-xs font-bold text-slate-600 bg-white/80 px-1 rounded"><ZoomIn size={10} className="inline"/> 10x</div>
               </div>
-              <div>
-                 <h4 className="font-bold text-slate-800">Уақыт өлшеу</h4>
-                 <p className="text-xs text-slate-500">{finished ? 'Аяқталды' : 'Өлшенуде...'}</p>
+              <span className="text-xs font-bold text-slate-500">Ламинарлық ағын</span>
+           </div>
+        </div>
+
+        {/* Оң жақ: Басқару және График */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+           
+           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+              <div className="flex gap-2">
+                 {Object.entries(liquids).map(([k, v]) => (
+                    <button 
+                       key={k} 
+                       onClick={() => { setLiquidType(k as any); reset(); }}
+                       className={`px-4 py-2 rounded-lg text-sm font-bold border transition-all ${liquidType === k ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+                    >
+                       {v.name}
+                    </button>
+                 ))}
+              </div>
+              <div className="flex gap-2">
+                 <button onClick={() => setIsDropping(true)} disabled={isDropping || ballY >= 100} className="px-6 py-2 bg-green-500 text-white font-bold rounded-lg shadow hover:bg-green-600 disabled:opacity-50 flex items-center gap-2">
+                    <Play size={18}/> Жіберу
+                 </button>
+                 <button onClick={reset} className="px-4 py-2 bg-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-300">
+                    <RotateCcw size={18}/>
+                 </button>
               </div>
            </div>
 
-           <div className="flex gap-4">
-              <button onClick={() => setIsDropping(true)} disabled={isDropping} className="flex-1 py-4 bg-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 disabled:opacity-50">
-                 <Play size={20}/> Жіберу
-              </button>
-              <button onClick={reset} className="px-6 py-4 bg-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-300">
-                 <RotateCcw size={20}/>
-              </button>
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-3 rounded-xl border shadow-sm">
+                 <span className="text-xs text-slate-400 font-bold uppercase">Уақыт</span>
+                 <div className="text-2xl font-mono text-slate-800">{time.toFixed(2)} с</div>
+              </div>
+              <div className="bg-white p-3 rounded-xl border shadow-sm">
+                 <span className="text-xs text-slate-400 font-bold uppercase">Жылдамдық</span>
+                 <div className="text-2xl font-mono text-indigo-600">{velocity.toFixed(3)} м/с</div>
+              </div>
+              <div className="bg-white p-3 rounded-xl border shadow-sm">
+                 <span className="text-xs text-slate-400 font-bold uppercase">Тұтқырлық (η)</span>
+                 <div className="text-xl font-bold text-slate-700">{currentL.eta} Па·с</div>
+              </div>
+              <div className="bg-white p-3 rounded-xl border shadow-sm">
+                 <span className="text-xs text-slate-400 font-bold uppercase">Тығыздық (ρ)</span>
+                 <div className="text-xl font-bold text-slate-700">{currentL.rho} кг/м³</div>
+              </div>
            </div>
 
-           {finished && (
-              <div className="p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-200">
-                 <strong>Нәтиже:</strong> {currentLiquid.name} ішінде шар <strong>{time.toFixed(2)} секундта</strong> түсті. 
-                 {liquid === 'glycerin' ? ' Тұтқырлық өте жоғары.' : (liquid === 'water' ? ' Тұтқырлық төмен.' : ' Тұтқырлық орташа.')}
-              </div>
-           )}
+           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-inner flex-1 min-h-[250px] relative">
+              <h4 className="text-sm font-bold text-slate-500 mb-2 flex items-center gap-2"><Activity size={16}/> Жылдамдық графигі v(t)</h4>
+              <svg className="w-full h-full absolute inset-0 pt-10 px-4 pb-4" viewBox="0 0 100 50" preserveAspectRatio="none">
+                 <line x1="0" y1="50" x2="100" y2="50" stroke="#cbd5e1" strokeWidth="0.5"/>
+                 <line x1="0" y1="0" x2="0" y2="50" stroke="#cbd5e1" strokeWidth="0.5"/>
+                 <polyline 
+                    fill="none"
+                    stroke="#4f46e5"
+                    strokeWidth="1"
+                    points={graphData.map((d, i) => `${(i / (graphData.length || 1)) * 100},${50 - (d.v * 20)}`).join(' ')}
+                 />
+                 <line x1="0" y1={50 - 2.5 * 20} x2="100" y2={50 - 2.5 * 20} strokeDasharray="2" stroke="red" strokeWidth="0.2" opacity={0.5} />
+              </svg>
+           </div>
+
         </div>
       </div>
     </div>
