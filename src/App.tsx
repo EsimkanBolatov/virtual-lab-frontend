@@ -11,7 +11,7 @@ import PhaseChangeExperiment from './components/experiments/PhaseChangeExperimen
 import ProteinDenaturationExperiment from './components/experiments/ProteinDenaturationExperiment';
 import SubstancePropertiesExperiment from './components/experiments/SubstancePropertiesExperiment';
 import BoneStructureExperiment from './components/experiments/BoneStructureExperiment';
-// Жаңа Физика компоненттері
+// Физика компоненттері
 import PhysicsMeasurementExperiment from './components/experiments/PhysicsMeasurementExperiment';
 import PhysicsDensityExperiment from './components/experiments/PhysicsDensityExperiment';
 import PhysicsOhmsLawExperiment from './components/experiments/PhysicsOhmsLawExperiment';
@@ -47,15 +47,15 @@ type Page = 'auth' | 'home' | 'experiments' | 'experiment-detail';
 
 // ============= DATA: МҰҒАЛІМДЕР МЕН АВТОРЛАР =============
 const teachers = [
-  { name: 'Дубанова Нұрханым', subject: 'Химия', exp: 34, icon: '⚗️', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { name: 'Парменкулова Динара', subject: 'Физика', exp: 13, icon: '⚛️', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { name: 'Таттимбетова Ляззат', subject: 'География', exp: 21, icon: '🌍', color: 'bg-green-50 text-green-700 border-green-200' },
-  { name: 'Алдатаева Жанара', subject: 'Биология', exp: 20, icon: '🧬', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  { name: 'Дубанова Нұрханым', subject: 'Химия', exp: 34, icon: '⚗️', color: 'from-blue-400 to-blue-600' },
+  { name: 'Парменкулова Динара', subject: 'Физика', exp: 13, icon: '⚛️', color: 'from-purple-400 to-purple-600' },
+  { name: 'Таттимбетова Ляззат', subject: 'География', exp: 21, icon: '🌍', color: 'from-green-400 to-green-600' },
+  { name: 'Алдатаева Жанара', subject: 'Биология', exp: 20, icon: '🧬', color: 'from-pink-400 to-pink-600' },
 ];
 
 const students = [
-  { name: 'Ауғанбай Байсал', role: 'Дизайнер 🎨' },
-  { name: 'Ерлан Алижан', role: 'Разработчик 💻' },
+  { name: 'Ауғанбай Байсал', role: 'Дизайнер 🎨', color: 'from-orange-400 to-red-500' },
+  { name: 'Ерлан Алижан', role: 'Разработчик 💻', color: 'from-cyan-400 to-blue-500' },
 ];
 
 // ============= AUTH STORE =============
@@ -110,7 +110,7 @@ const Header: React.FC<{ onLogout: () => void; user: User | null; onNavigate: (p
             </motion.div>
             <div>
               <h1 className="text-2xl font-bold text-white">
-                Virtual Lab
+                Виртуалды Лаборатория
               </h1>
               <p className="text-xs text-blue-100">Интерактивті оқыту платформасы</p>
             </div>
@@ -119,10 +119,11 @@ const Header: React.FC<{ onLogout: () => void; user: User | null; onNavigate: (p
           {user && (
             <div className="flex items-center space-x-4">
               <motion.div 
-                className="text-right text-white opacity-90"
+                className="text-right bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl"
+                whileHover={{ scale: 1.05 }}
               >
-                <p className="font-semibold text-sm">{user.full_name}</p>
-                <p className="text-xs opacity-80">
+                <p className="font-semibold text-white">{user.full_name}</p>
+                <p className="text-xs text-blue-100">
                   {user.role === 'student' ? '👨‍🎓 Оқушы' : '👨‍🏫 Мұғалім'}
                   {user.grade && ` • ${user.grade}-сынып`}
                 </p>
@@ -131,7 +132,7 @@ const Header: React.FC<{ onLogout: () => void; user: User | null; onNavigate: (p
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onLogout}
-                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full text-xs font-bold backdrop-blur-sm transition"
+                className="bg-white text-red-600 px-6 py-2 rounded-full font-semibold shadow-lg hover:shadow-xl"
               >
                 🚪 Шығу
               </motion.button>
@@ -290,77 +291,94 @@ const HomePage: React.FC<{ user: User; onNavigate: (page: Page, subject?: string
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-7xl mx-auto px-6 py-12">
         
-        {/* HERO */}
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold text-slate-800 mb-4">Қош келдіңіз, {user.full_name}! 👋</h1>
-          <p className="text-2xl text-slate-500">Виртуалды зертханада ғылым әлемін ашыңыз</p>
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-4">Қош келдіңіз, {user.full_name}! 👋</h1>
+          <p className="text-2xl text-gray-600">Виртуалды зертханада тәжірибелерді қауіпсіз жасаңыз</p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {[
+            { label: 'Аяқталған', value: '12', icon: '✅', color: 'from-blue-500 to-blue-600' },
+            { label: 'Орташа ұпай', value: '85%', icon: '🎯', color: 'from-green-500 to-green-600' },
+            { label: 'Қолжетімді', value: '45', icon: '🔬', color: 'from-purple-500 to-purple-600' }
+          ].map((stat, i) => (
+            <motion.div key={i} initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ scale: 1.05, y: -5 }} className={`bg-gradient-to-br ${stat.color} rounded-2xl shadow-2xl p-8 text-white`}>
+              <div className="flex items-center justify-between">
+                <div><p className="text-white/80 text-lg mb-2">{stat.label}</p><p className="text-5xl font-bold">{stat.value}</p></div>
+                <div className="text-7xl opacity-50">{stat.icon}</div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
-        {/* ПӘНДЕР */}
-        <div className="mb-20">
-          <h2 className="text-3xl font-bold text-slate-800 mb-8 pl-4 border-l-8 border-indigo-500">📚 Пәндер</h2>
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-8">📚 Пәндер</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {subjects.map((subject, i) => (
-              <motion.div 
-                key={subject.id} 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: i * 0.1 }} 
-                whileHover={{ scale: 1.05, y: -5 }} 
-                onClick={() => onNavigate('experiments', subject.id)} 
-                className={`bg-gradient-to-br ${subject.color} rounded-3xl shadow-xl p-8 cursor-pointer text-white relative overflow-hidden group`}
-              >
-                <div className="absolute top-0 right-0 text-9xl opacity-10 group-hover:opacity-20 transition-opacity rotate-12 -mr-8 -mt-4">{subject.icon}</div>
+              <motion.div key={subject.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} whileHover={{ scale: 1.08, rotate: 2 }} onClick={() => onNavigate('experiments', subject.id)} className={`bg-gradient-to-br ${subject.color} rounded-2xl shadow-2xl p-8 cursor-pointer text-white relative overflow-hidden`}>
+                <div className="absolute top-0 right-0 text-9xl opacity-10 -mr-8 -mt-4">{subject.icon}</div>
                 <div className="relative z-10">
-                  <div className="text-5xl mb-4 bg-white/20 w-20 h-20 rounded-2xl flex items-center justify-center backdrop-blur-sm">{subject.icon}</div>
-                  <h3 className="text-2xl font-bold mb-2">{subject.name}</h3>
-                  <p className="opacity-90 font-medium">{subject.experiments} зертханалық жұмыс</p>
+                  <div className="text-6xl mb-4">{subject.icon}</div>
+                  <h3 className="text-3xl font-bold mb-2">{subject.name}</h3>
+                  <p className="text-lg opacity-90">{subject.experiments} тәжірибе</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* ҰСТАЗДАР (ЖАҢА) */}
-        <div className="mb-20">
-          <h2 className="text-3xl font-bold text-slate-800 mb-8 pl-4 border-l-8 border-blue-500">👨‍🏫 Біздің ұстаздар</h2>
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-8">👨‍🏫 Біздің ұстаздар</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {teachers.map((teacher, i) => (
-              <motion.div key={i} whileHover={{ y: -5 }} className={`bg-white p-6 rounded-2xl shadow-lg border-2 ${teacher.color.split(' ')[2]} hover:shadow-xl transition-all`}>
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 ${teacher.color.replace('border-', '').replace('text-', 'bg-').replace('200', '100')} text-slate-700`}>
-                   {teacher.icon}
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -10, scale: 1.05 }} className={`bg-gradient-to-br ${teacher.color} rounded-2xl shadow-xl p-6 text-white relative overflow-hidden`}>
+                <div className="absolute top-0 right-0 text-8xl opacity-10">{teacher.icon}</div>
+                <div className="relative z-10">
+                  <div className="text-5xl mb-3">{teacher.icon}</div>
+                  <h3 className="font-bold text-xl mb-1">{teacher.name}</h3>
+                  <p className="text-sm opacity-90 mb-3">{teacher.subject} пәні мұғалімі</p>
+                  <span className="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold">
+                    ⭐ {teacher.exp} жыл тәжірибе
+                  </span>
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-1">{teacher.name}</h3>
-                <p className="text-sm font-semibold text-slate-500 mb-3">{teacher.subject} пәні мұғалімі</p>
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${teacher.color}`}>
-                  ⭐ {teacher.exp} жыл тәжірибе
-                </span>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* АВТОРЛАР (ЖАҢА) */}
-        <div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-8 pl-4 border-l-8 border-pink-500">🚀 Жоба авторлары</h2>
-          <div className="flex gap-6 flex-wrap">
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-8">🚀 Жоба авторлары</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {students.map((student, i) => (
-              <motion.div key={i} whileHover={{ scale: 1.05 }} className="bg-white px-8 py-6 rounded-2xl shadow-md border border-slate-100 flex items-center gap-4">
-                <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                  {student.name.charAt(0)}
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg text-slate-800">{student.name}</h4>
-                  <p className="text-indigo-600 font-medium text-sm">{student.role}</p>
+              <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} whileHover={{ scale: 1.05, y: -5 }} className={`bg-gradient-to-br ${student.color} rounded-2xl shadow-xl p-8 text-white relative overflow-hidden`}>
+                <div className="absolute bottom-0 right-0 text-9xl opacity-10">💫</div>
+                <div className="relative z-10">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-3xl font-bold mb-4">
+                    {student.name.charAt(0)}
+                  </div>
+                  <h4 className="font-bold text-2xl mb-2">{student.name}</h4>
+                  <p className="text-lg opacity-90">{student.role}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} whileHover={{ scale: 1.02 }} className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl p-12 text-white text-center relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            {[...Array(15)].map((_, i) => (
+              <motion.div key={i} className="absolute text-6xl" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }} animate={{ y: [0, -30, 0], rotate: [0, 360] }} transition={{ duration: 4 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}>{['🧪', '🔬', '⚗️'][i % 3]}</motion.div>
+            ))}
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-4xl font-bold mb-4">🚀 Жаңа тәжірибе бастауға дайынсыз ба?</h3>
+            <p className="mb-8 text-2xl opacity-90">Қызықты тәжірибелерді бастаңыз және білім алыңыз</p>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => onNavigate('experiments')} className="bg-white text-purple-600 px-12 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl">Тәжірибелерді қарау →</motion.button>
+          </div>
+        </motion.div>
       </motion.div>
     </div>
   );
@@ -371,24 +389,16 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [filter, setFilter] = useState(selectedSubject || '');
 
-  // БАРЛЫҚ ЭКСПЕРИМЕНТТЕР ТІЗІМІ
   const experiments: Experiment[] = [
-    // ХИМИЯ
     { id: 1, title: 'Тұз қышқылының бейтараптану реакциясы', subject: 'chemistry', grade: 7, description: 'HCl және NaOH бейтараптану реакциясы', type: 'lab', difficulty: 'easy', duration_minutes: 20 },
     { id: 2, title: 'Ерітінділер дайындау', subject: 'chemistry', grade: 8, description: 'Пайыздық концентрациясы берілген ерітіндіні дайындау', type: 'practical', difficulty: 'medium', duration_minutes: 30 },
+    { id: 3, title: 'Митозды зерттеу', subject: 'biology', grade: 9, description: 'Пияз тамыры жасушаларындағы митоз фазаларын микроскоппен қарау', type: 'lab', difficulty: 'hard', duration_minutes: 40 },
     { id: 4, title: 'Мыс пен мырыш иондарын тану', subject: 'chemistry', grade: 10, description: 'Cu²⁺, Zn²⁺ иондарына сапалық реакциялар', type: 'lab', difficulty: 'medium', duration_minutes: 25 },
     { id: 5, title: 'Азық-түлік құрамын анықтау', subject: 'chemistry', grade: 7, description: 'Нәруыз, май және көмірсуларды анықтау', type: 'lab', difficulty: 'easy', duration_minutes: 25 },
-    
-    // БИОЛОГИЯ
-    { id: 3, title: 'Митозды зерттеу', subject: 'biology', grade: 9, description: 'Пияз тамыры жасушаларындағы митоз фазаларын микроскоппен қарау', type: 'lab', difficulty: 'hard', duration_minutes: 40 },
-    { id: 7, title: 'Нәруыздар денатурациясы', subject: 'biology', grade: 10, description: 'Температура мен pH-тың нәруыз құрылымына әсері', type: 'lab', difficulty: 'hard', duration_minutes: 35 },
-    { id: 9, title: 'Сүйек құрылысы', subject: 'biology', grade: 8, description: 'Сүйектің макро және микроскопиялық құрылымын зерттеу', type: 'lab', difficulty: 'medium', duration_minutes: 25 },
-    
-    // ЖАРАТЫЛЫСТАНУ
     { id: 6, title: 'Фазалық өзгерістер', subject: 'science', grade: 6, description: 'Судың агрегаттық күйлерінің өзгеруі (мұз, су, бу)', type: 'lab', difficulty: 'easy', duration_minutes: 15 },
+    { id: 7, title: 'Нәруыздар денатурациясы', subject: 'biology', grade: 10, description: 'Температура мен pH-тың нәруыз құрылымына әсері', type: 'lab', difficulty: 'hard', duration_minutes: 35 },
     { id: 8, title: 'Заттардың қасиеттері', subject: 'science', grade: 5, description: 'Қаттылық, ерігіштік және серпімділік қасиеттерін зерттеу', type: 'practical', difficulty: 'easy', duration_minutes: 15 },
-
-    // ФИЗИКА (ЖАҢА)
+    { id: 9, title: 'Сүйек құрылысы', subject: 'biology', grade: 8, description: 'Сүйектің макро және микроскопиялық құрылымын зерттеу', type: 'lab', difficulty: 'medium', duration_minutes: 25 },
     { id: 10, title: 'Физикалық шамаларды өлшеу', subject: 'physics', grade: 7, description: 'Ұзындықты, көлемді және температураны өлшеу құралдарымен танысу', type: 'lab', difficulty: 'easy', duration_minutes: 20 },
     { id: 11, title: 'Сұйықтар мен қатты денелердің тығыздығы', subject: 'physics', grade: 7, description: 'Масса мен көлемді өлшеу арқылы тығыздықты анықтау', type: 'lab', difficulty: 'medium', duration_minutes: 25 },
     { id: 12, title: 'Мұздың меншікті балқу жылуы', subject: 'physics', grade: 8, description: 'Калориметр көмегімен жылу мөлшерін есептеу', type: 'lab', difficulty: 'medium', duration_minutes: 30 },
@@ -420,29 +430,36 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
     return '🌍';
   };
 
+  const getSubjectColor = (s: string) => {
+    if (s === 'chemistry') return 'from-blue-500 to-blue-600';
+    if (s === 'biology') return 'from-green-500 to-green-600';
+    if (s === 'physics') return 'from-purple-500 to-purple-600';
+    return 'from-orange-500 to-orange-600';
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800">
-            🔬 Зертханалық жұмыстар
+          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            🔬 Тәжірибелер тізімі
           </h1>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onBack} className="bg-white border border-slate-300 text-slate-700 px-6 py-2 rounded-xl font-bold shadow-sm hover:shadow-md">← Артқа</motion.button>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onBack} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg">← Артқа</motion.button>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-          <h3 className="text-xl font-bold text-slate-800 mb-4">Сүзгі (Фильтр)</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-2xl p-6 mb-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">🔍 Сүзгі</h3>
           <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-bold text-slate-500 mb-2">Сынып</label>
-              <select value={selectedGrade || ''} onChange={(e) => setSelectedGrade(e.target.value ? Number(e.target.value) : null)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-semibold">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Сынып</label>
+              <select value={selectedGrade || ''} onChange={(e) => setSelectedGrade(e.target.value ? Number(e.target.value) : null)} className="px-6 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-lg font-semibold">
                 <option value="">Барлығы</option>
                 {[5,6,7,8,9,10,11].map(g => (<option key={g} value={g}>{g}-сынып</option>))}
               </select>
             </div>
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-bold text-slate-500 mb-2">Пән</label>
-              <select value={filter} onChange={(e) => setFilter(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-semibold">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Пән</label>
+              <select value={filter} onChange={(e) => setFilter(e.target.value)} className="px-6 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-lg font-semibold">
                 <option value="">Барлығы</option>
                 <option value="chemistry">⚗️ Химия</option>
                 <option value="biology">🧬 Биология</option>
@@ -453,25 +470,28 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filtered.map((exp, i) => (
-            <motion.div key={exp.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} whileHover={{ y: -5 }} onClick={() => onNavigate('experiment-detail', exp.id)} className="bg-white rounded-2xl border border-slate-200 overflow-hidden cursor-pointer hover:shadow-xl hover:border-indigo-300 transition-all group">
-              <div className={`h-2 bg-gradient-to-r ${exp.subject === 'chemistry' ? 'from-blue-400 to-blue-600' : exp.subject === 'biology' ? 'from-green-400 to-green-600' : exp.subject === 'physics' ? 'from-purple-400 to-purple-600' : 'from-orange-400 to-orange-600'}`}></div>
+            <motion.div key={exp.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ scale: 1.05, y: -10 }} onClick={() => onNavigate('experiment-detail', exp.id)} className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-pointer">
+              <div className={`bg-gradient-to-r ${getSubjectColor(exp.subject)} p-8 text-white relative overflow-hidden`}>
+                <div className="absolute top-0 right-0 text-9xl opacity-20 -mr-8 -mt-4">{getSubjectIcon(exp.subject)}</div>
+                <div className="relative z-10">
+                  <div className="text-7xl mb-4">{getSubjectIcon(exp.subject)}</div>
+                  <h3 className="text-2xl font-bold mb-2">{exp.title}</h3>
+                  <p className="text-lg opacity-90">{exp.subject === 'chemistry' ? 'Химия' : (exp.subject === 'biology' ? 'Биология' : (exp.subject === 'physics' ? 'Физика' : 'Жаратылыстану'))}</p>
+                </div>
+              </div>
               <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                   <div className="text-4xl">{getSubjectIcon(exp.subject)}</div>
-                   <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">{exp.duration_minutes} мин</span>
+                <p className="text-gray-600 mb-4 text-lg">{exp.description}</p>
+                <div className="flex items-center justify-between mb-4">
+                  <span className={`px-4 py-2 rounded-xl text-sm font-bold border-2 ${getDifficultyColor(exp.difficulty)}`}>{exp.difficulty === 'easy' ? '🟢 Оңай' : exp.difficulty === 'medium' ? '🟡 Орташа' : '🔴 Қиын'}</span>
+                  <span className="text-lg font-bold text-gray-600">📚 {exp.grade}-сынып</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{exp.title}</h3>
-                <p className="text-slate-500 text-sm mb-4 line-clamp-2">{exp.description}</p>
-                <div className="flex gap-2">
-                  <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${getDifficultyColor(exp.difficulty)}`}>
-                    {exp.difficulty === 'easy' ? 'Оңай' : exp.difficulty === 'medium' ? 'Орташа' : 'Қиын'}
-                  </span>
-                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                    {exp.grade}-сынып
-                  </span>
+                <div className="flex items-center justify-between text-lg text-gray-500 mb-4">
+                  <div>⏱ {exp.duration_minutes} мин</div>
+                  <div>📋 {exp.type === 'lab' ? 'Зертхана' : 'Практика'}</div>
                 </div>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg">Бастау →</motion.button>
               </div>
             </motion.div>
           ))}
@@ -508,7 +528,11 @@ const App: React.FC = () => {
     }
   };
 
-  // ЭКСПЕРИМЕНТТІ ТАҢДАУ ЛОГИКАСЫ
+  const handleLogout = () => {
+    logout();
+    setCurrentPage('auth');
+  };
+
   const renderExperiment = () => {
     switch (selectedExperimentId) {
       case 1: return <HClExperiment onBack={() => handleNavigate('experiments')} />;
@@ -524,18 +548,18 @@ const App: React.FC = () => {
       case 11: return <PhysicsDensityExperiment onBack={() => handleNavigate('experiments')} />;
       case 13: return <PhysicsOhmsLawExperiment onBack={() => handleNavigate('experiments')} />;
       case 15: return <PhysicsProjectileExperiment onBack={() => handleNavigate('experiments')} />;
-      case 12: return <PhysicsCalorimetryExperiment onBack={() => handleNavigate('experiments')} />; // Мұз
-      case 14: return <PhysicsAccelerationExperiment onBack={() => handleNavigate('experiments')} />; // Үдеу
-      case 19: return <PhysicsDiffractionExperiment onBack={() => handleNavigate('experiments')} />; // Дифракция
+      case 12: return <PhysicsCalorimetryExperiment onBack={() => handleNavigate('experiments')} />;
+      case 14: return <PhysicsAccelerationExperiment onBack={() => handleNavigate('experiments')} />;
+      case 19: return <PhysicsDiffractionExperiment onBack={() => handleNavigate('experiments')} />;
       case 16: return <PhysicsStokesExperiment onBack={() => handleNavigate('experiments')} />;
       case 17: return <PhysicsEMFExperiment onBack={() => handleNavigate('experiments')} />;
       case 18: return <PhysicsTransformerExperiment onBack={() => handleNavigate('experiments')} />;
       default: return (
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-           <div className="text-6xl mb-4">🚧</div>
-           <h2 className="text-2xl font-bold text-slate-800">Бұл жұмыс әзірлену үстінде</h2>
-           <p className="text-slate-500 mt-2">Жақын арада іске қосылады!</p>
-           <button onClick={() => handleNavigate('experiments')} className="mt-6 text-indigo-600 font-bold hover:underline">Тізімге оралу</button>
+          <div className="text-6xl mb-4">🚧</div>
+          <h2 className="text-2xl font-bold text-gray-800">Бұл жұмыс әзірлену үстінде</h2>
+          <p className="text-gray-500 mt-2">Жақын арада іске қосылады!</p>
+          <button onClick={() => handleNavigate('experiments')} className="mt-6 text-indigo-600 font-bold hover:underline">Тізімге оралу</button>
         </div>
       );
     }
@@ -550,7 +574,7 @@ const App: React.FC = () => {
           </motion.div>
         ) : (
           <>
-            <Header onLogout={() => { logout(); setCurrentPage('auth'); }} user={user} onNavigate={handleNavigate} />
+            <Header onLogout={handleLogout} user={user} onNavigate={handleNavigate} />
             <AnimatePresence mode="wait">
               {currentPage === 'home' && user && (
                 <motion.div key="home" initial={{ opacity: 0, x: -100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 100 }}>
@@ -565,7 +589,7 @@ const App: React.FC = () => {
               )}
               
               {currentPage === 'experiment-detail' && (
-                <motion.div key="experiment-detail" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                <motion.div key="experiment-detail" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
                   <div className="max-w-7xl mx-auto px-6 py-8">
                     {renderExperiment()}
                   </div>
