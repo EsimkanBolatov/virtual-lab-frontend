@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, RefreshCw, FlaskConical, Droplets, CheckCircle2} from 'lucide-react';
+import { ArrowRight, RefreshCw, FlaskConical, Droplets, CheckCircle2 } from 'lucide-react';
+
+// Проптардың интерфейсін қосамыз
+interface HClExperimentProps {
+  onBack: () => void;
+}
 
 // Типы для состояния эксперимента
 type Step = 'selection' | 'indicator' | 'titration' | 'result';
 type Indicator = 'litmus' | 'phenolphthalein' | null;
 
-const HClExperiment: React.FC = () => {
+// Компонентке { onBack } қабылдайтын мүмкіндік береміз
+const HClExperiment: React.FC<HClExperimentProps> = ({ onBack }) => {
   const [step, setStep] = useState<Step>('selection');
   const [indicator, setIndicator] = useState<Indicator>(null);
   const [addedBaseVolume, setAddedBaseVolume] = useState(0); // 0 to 100
@@ -59,14 +65,22 @@ const HClExperiment: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[600px] bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
       
-      {/* Заголовок Лабораторной */}
-      <div className="absolute top-4 left-6">
+      {/* HEADER: Заголовок и кнопка назад */}
+      <div className="absolute top-4 left-6 z-10">
         <h2 className="text-xl font-bold text-slate-800">Лаб. №8: Нейтрализация кислоты</h2>
         <p className="text-sm text-slate-500">7 сынып • Химия</p>
       </div>
+      
+      {/* Кнопка АРТҚА (жоғарғы оң жақта) */}
+      <button 
+        onClick={onBack}
+        className="absolute top-4 right-6 z-10 text-slate-400 hover:text-indigo-600 transition-colors font-bold text-sm flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full border border-slate-200 hover:border-indigo-300"
+      >
+        ← Артқа
+      </button>
 
       {/* Индикатор прогресса */}
-      <div className="flex gap-2 mb-8 mt-12">
+      <div className="flex gap-2 mb-8 mt-12 relative z-0">
         {['Реагенттер', 'Индикатор', 'Тәжірибе', 'Нәтиже'].map((_, idx) => {
           const steps: Step[] = ['selection', 'indicator', 'titration', 'result'];
           const isActive = steps.indexOf(step) >= idx;
@@ -77,7 +91,7 @@ const HClExperiment: React.FC = () => {
       </div>
 
       {/* Основная сцена */}
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-8 min-h-[400px] flex items-center justify-center relative">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-8 min-h-[400px] flex items-center justify-center relative z-0">
         <AnimatePresence mode='wait'>
           
           {/* ШАГ 1: ВЫБОР РЕАГЕНТОВ */}
@@ -93,7 +107,6 @@ const HClExperiment: React.FC = () => {
               <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto">
                 <div 
                   className="p-6 border-2 border-dashed border-indigo-200 rounded-xl bg-indigo-50 flex flex-col items-center cursor-pointer hover:border-indigo-500 transition-colors"
-                  onClick={() => {}} // В полной версии можно добавить state выбора
                 >
                   <FlaskConical size={48} className="text-indigo-600 mb-2" />
                   <span className="font-bold text-lg">HCl</span>
@@ -257,7 +270,7 @@ const HClExperiment: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="absolute -right-6 top-10 bg-white p-6 rounded-xl shadow-xl border border-green-100 max-w-xs"
+                    className="absolute -right-6 top-10 bg-white p-6 rounded-xl shadow-xl border border-green-100 max-w-xs z-50"
                   >
                     <div className="flex items-center gap-2 text-green-600 mb-2">
                         <CheckCircle2 size={20} />
