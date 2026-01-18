@@ -22,7 +22,7 @@ const ExperimentsListPage = () => {
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { token, user } = useAuthStore();
+  const { token } = useAuthStore();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
