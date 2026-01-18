@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react'; // Zap алынып тасталды
 
 const PhysicsTransformerExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [n1, setN1] = useState(500); // Бірінші реттік орам

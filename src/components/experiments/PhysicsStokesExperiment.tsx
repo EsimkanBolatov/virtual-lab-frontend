@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Droplets, Timer, Play, RotateCcw } from 'lucide-react';
+import { Droplets, Play, RotateCcw } from 'lucide-react'; // Timer алынып тасталды
 
 const PhysicsStokesExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [liquid, setLiquid] = useState('water');
