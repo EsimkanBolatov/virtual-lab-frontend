@@ -16,6 +16,9 @@ import PhysicsMeasurementExperiment from './components/experiments/PhysicsMeasur
 import PhysicsDensityExperiment from './components/experiments/PhysicsDensityExperiment';
 import PhysicsOhmsLawExperiment from './components/experiments/PhysicsOhmsLawExperiment';
 import PhysicsProjectileExperiment from './components/experiments/PhysicsProjectileExperiment';
+import PhysicsAccelerationExperiment from './components/experiments/PhysicsAccelerationExperiment';
+import PhysicsCalorimetryExperiment from './components/experiments/PhysicsCalorimetryExperiment';
+import PhysicsDiffractionExperiment from './components/experiments/PhysicsDiffractionExperiment';
 
 // ============= TYPES =============
 interface User {
@@ -518,6 +521,9 @@ const App: React.FC = () => {
       case 11: return <PhysicsDensityExperiment onBack={() => handleNavigate('experiments')} />;
       case 13: return <PhysicsOhmsLawExperiment onBack={() => handleNavigate('experiments')} />;
       case 15: return <PhysicsProjectileExperiment onBack={() => handleNavigate('experiments')} />;
+      case 12: return <PhysicsCalorimetryExperiment onBack={() => handleNavigate('experiments')} />; // Мұз
+      case 14: return <PhysicsAccelerationExperiment onBack={() => handleNavigate('experiments')} />; // Үдеу
+      case 19: return <PhysicsDiffractionExperiment onBack={() => handleNavigate('experiments')} />; // Дифракция
       default: return (
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
            <div className="text-6xl mb-4">🚧</div>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Target, RotateCcw, Play } from 'lucide-react';
+import { Rocket, Target } from 'lucide-react'; // RotateCcw және Play алынып тасталды
 
 const PhysicsProjectileExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [height, setHeight] = useState(20); // метр (h)
@@ -57,11 +57,10 @@ const PhysicsProjectileExperiment: React.FC<{ onBack: () => void }> = ({ onBack 
            style={{ bottom: `${height * 10}px`, left: '120px' }}
            animate={isLaunched ? { 
              x: distance * 10, // Масштаб 1м = 10px
-             y: height * 10 // Төмен түсу (screen coordinates are inverted relative to physics y)
+             y: height * 10 // Төмен түсу
            } : { x: 0, y: 0 }}
-           transition={{ duration: timeToFall, ease: "linear" }} // Physics approximation for horizontal, vertical handled by curve usually but simplified here for linear time
+           transition={{ duration: timeToFall, ease: "linear" }}
          >
-            {/* Шын мәнінде парабола CSS/Framer-мен қиын, сондықтан қарапайым CSS transition қолданамыз немесе keyframes */}
          </motion.div>
 
          {/* Траектория сызығы (Launch басқанда шығады) */}
@@ -69,7 +68,6 @@ const PhysicsProjectileExperiment: React.FC<{ onBack: () => void }> = ({ onBack 
             <svg className="absolute inset-0 w-full h-full pointer-events-none">
                <path 
                  d={`M 130 ${500 - height * 10} Q ${130 + (distance * 10) / 2} ${500 - height * 10} ${130 + distance * 10} 500`}
-                 // Бұл өте дөрекі парабола, дәл физикалық емес, бірақ визуализация үшін жарайды
                  fill="none" 
                  stroke="gray" 
                  strokeDasharray="5,5" 
