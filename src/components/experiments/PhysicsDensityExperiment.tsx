@@ -1,173 +1,174 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Scale, Beaker, CheckCircle2, RefreshCw } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 
 const PhysicsDensityExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [selectedObject, setSelectedObject] = useState<any>(null);
-  const [inWater, setInWater] = useState(false);
-  const [userDensity, setUserDensity] = useState('');
-  const [result, setResult] = useState<string | null>(null);
+  const [mode, setMode] = useState<'learn' | 'mystery'>('learn');
+  const [selectedObj, setSelectedObj] = useState<any>(null);
+  const [step, setStep] = useState(0); // 0: Select, 1: Weigh Air, 2: Weigh Water
+  const [userGuess, setUserGuess] = useState('');
+  const [feedback, setFeedback] = useState<string | null>(null);
 
-  const objects = [
-    { id: 'gold', name: 'Алтын сақина', mass: 193, volume: 10, color: '#fbbf24', density: 19.3 },
-    { id: 'iron', name: 'Темір бұранда', mass: 78, volume: 10, color: '#94a3b8', density: 7.8 },
-    { id: 'wood', name: 'Ағаш текше', mass: 7, volume: 10, color: '#d97706', density: 0.7 }, // Жүзеді
+  const materials = [
+    { id: 'gold', name: 'Алтын', density: 19.3, color: '#fbbf24', mass: 193 },
+    { id: 'iron', name: 'Темір', density: 7.8, color: '#94a3b8', mass: 78 },
+    { id: 'alum', name: 'Алюминий', density: 2.7, color: '#cbd5e1', mass: 27 },
   ];
 
-  const handleWeigh = (obj: any) => {
-    setSelectedObject(obj);
-    setInWater(false);
-    setResult(null);
-    setUserDensity('');
+  const mysteryObj = { id: 'mystery', name: '?', density: 8.9, color: '#b45309', mass: 89, realName: 'Мыс (Copper)' };
+
+  const handleSelect = (obj: any) => {
+    setSelectedObj(obj);
+    setStep(1);
+    setFeedback(null);
+    setUserGuess('');
   };
 
-  const handleDrop = () => {
-    if (selectedObject) setInWater(true);
-  };
-
-  const checkAnswer = () => {
-    if (!selectedObject) return;
-    const val = parseFloat(userDensity);
-    if (Math.abs(val - selectedObject.density) < 0.5) {
-      setResult('correct');
-    } else {
-      setResult('wrong');
-    }
+  const getWeightInWater = () => {
+    if (!selectedObj) return 0;
+    // Архимед күші: Fa = p_su * g * V. V = m / p_zat.
+    // P_su = P_au - Fa.  (g=10 деп алайық қарапайымдылық үшін)
+    const volume = selectedObj.mass / selectedObj.density;
+    const buoyantForce = 1 * volume; // p_su = 1 g/cm3
+    return (selectedObj.mass - buoyantForce).toFixed(1);
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto min-h-[600px]">
+    <div className="bg-white rounded-2xl shadow-xl p-6 max-w-5xl mx-auto min-h-[650px]">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Физика. №3 Зертханалық жұмыс</h2>
-          <p className="text-slate-500">Сұйықтар мен қатты денелердің тығыздығын анықтау (ρ = m / V)</p>
+          <h2 className="text-2xl font-bold text-slate-800">Зертханалық жұмыс №3</h2>
+          <p className="text-slate-500">Заттың тығыздығын анықтау: ρ = m / V</p>
         </div>
-        <button onClick={onBack} className="text-indigo-600 font-medium hover:underline">← Артқа</button>
+        <div className="flex gap-2">
+           <button onClick={() => setMode('learn')} className={`px-4 py-2 rounded-lg font-bold text-sm ${mode === 'learn' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}>Оқу режимі</button>
+           <button onClick={() => {setMode('mystery'); handleSelect(mysteryObj);}} className={`px-4 py-2 rounded-lg font-bold text-sm ${mode === 'mystery' ? 'bg-purple-100 text-purple-700' : 'text-slate-500 hover:bg-slate-50'}`}>Құпия зат</button>
+           <button onClick={onBack} className="text-slate-400 hover:text-slate-600 ml-4">← Шығу</button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
         
-        {/* Сол жақ: Құралдар */}
-        <div className="space-y-8">
-           {/* Объектілер */}
-           <div className="flex gap-4 justify-center bg-slate-50 p-4 rounded-xl">
-              {objects.map(obj => (
-                <button 
-                  key={obj.id} 
-                  onClick={() => handleWeigh(obj)}
-                  className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${selectedObject?.id === obj.id ? 'border-indigo-500 bg-indigo-50' : 'border-transparent hover:bg-slate-200'}`}
-                >
-                   <div className="w-12 h-12 rounded-lg shadow-md mb-2" style={{ backgroundColor: obj.color }}></div>
-                   <span className="text-xs font-bold">{obj.name}</span>
-                </button>
-              ))}
+        {/* Анимация аймағы */}
+        <div className="bg-slate-100 rounded-3xl p-8 relative flex flex-col items-center justify-end border border-slate-200 overflow-hidden h-[450px]">
+           
+           {/* Динамометр */}
+           <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+              <div className="w-2 h-20 bg-slate-400"></div>
+              <div className="w-16 h-32 bg-white border-2 border-slate-400 rounded-lg flex flex-col items-center justify-center shadow-lg relative">
+                 <div className="text-xs text-slate-500 uppercase font-bold mb-1">Грамм</div>
+                 <div className="text-2xl font-mono font-bold text-slate-800">
+                    {step === 0 ? '0' : step === 1 ? selectedObj.mass : getWeightInWater()}
+                 </div>
+                 {/* Серіппе */}
+                 <div className="absolute -bottom-16 w-1 h-16 bg-slate-400 transition-all duration-500 origin-top"
+                      style={{ transform: `scaleY(${step > 0 ? 1.5 : 1})` }}></div>
+              </div>
            </div>
 
-           {/* Таразы */}
-           <div className="relative h-40 bg-slate-100 rounded-xl flex items-end justify-center pb-4 border border-slate-200">
-              <Scale size={100} className="text-slate-400 absolute bottom-4" />
-              {selectedObject && !inWater && (
-                 <motion.div 
-                   initial={{ y: -50, opacity: 0 }} 
-                   animate={{ y: 0, opacity: 1 }} 
-                   className="z-10 text-center mb-8"
-                 >
-                    <div className="w-16 h-16 rounded-lg shadow-lg mx-auto mb-2" style={{ backgroundColor: selectedObject.color }}></div>
-                    <div className="bg-white px-3 py-1 rounded shadow text-lg font-bold text-slate-800">{selectedObject.mass} г</div>
-                 </motion.div>
-              )}
-           </div>
+           {/* Ілмек және зат */}
+           {selectedObj && step > 0 && (
+             <motion.div 
+               className="absolute z-10 flex flex-col items-center"
+               initial={{ top: '150px' }}
+               animate={{ top: step === 2 ? '300px' : '220px' }}
+               transition={{ type: "spring", stiffness: 60 }}
+             >
+                <div className="w-12 h-12 rounded-lg shadow-md border border-black/10 flex items-center justify-center text-[10px] font-bold text-white/50" 
+                     style={{ backgroundColor: selectedObj.color }}>
+                   {selectedObj.id === 'mystery' ? '?' : selectedObj.name}
+                </div>
+             </motion.div>
+           )}
 
            {/* Мензурка (Су) */}
-           <div className="relative h-64 bg-slate-100 rounded-xl flex items-end justify-center border border-slate-200 overflow-hidden">
-              <div className="w-32 h-48 border-x-4 border-b-4 border-blue-300 bg-white relative rounded-b-xl">
-                 {/* Су деңгейі */}
-                 <motion.div 
-                   className="absolute bottom-0 w-full bg-blue-400/50 border-t border-blue-500 transition-all duration-500"
-                   style={{ height: inWater ? '80%' : '60%' }} // 60% = 50ml, 80% = 60ml
-                 >
-                    <div className="absolute top-1 right-2 text-xs font-bold text-blue-800">
-                       {inWater ? '60 мл' : '50 мл'}
-                    </div>
-                 </motion.div>
-                 
-                 {/* Батырылған зат */}
-                 {inWater && selectedObject && (
-                    <motion.div 
-                      initial={{ y: -100 }} 
-                      animate={{ y: selectedObject.id === 'wood' ? -30 : 20 }} // Ағаш қалқиды
-                      transition={{ type: 'spring' }}
-                      className="absolute bottom-10 left-10 w-12 h-12 rounded-lg shadow-md border border-white/50" 
-                      style={{ backgroundColor: selectedObject.color }}
-                    />
-                 )}
-              </div>
-              
-              {!inWater && selectedObject && (
-                 <button onClick={handleDrop} className="absolute top-4 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-600">
-                    Суға салу ↓
-                 </button>
-              )}
+           <div className="w-40 h-48 border-x-4 border-b-4 border-blue-200 bg-white/50 backdrop-blur-sm rounded-b-xl relative overflow-hidden z-10">
+              <motion.div 
+                 className="absolute bottom-0 w-full bg-blue-400/30 border-t border-blue-400 transition-all duration-700"
+                 style={{ height: step === 2 ? '80%' : '60%' }}
+              >
+                 <div className="absolute right-1 top-1 text-[10px] font-bold text-blue-800">
+                    {step === 2 ? `${(50 + selectedObj.mass/selectedObj.density).toFixed(1)} мл` : '50 мл'}
+                 </div>
+              </motion.div>
+              {/* Судың ішіндегі заттың көрінісі */}
            </div>
         </div>
 
-        {/* Оң жақ: Есептеу */}
-        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 h-fit">
-           <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><Beaker /> Нәтиже</h3>
-           
-           <div className="space-y-4 text-sm text-slate-600 mb-6">
-              <div className="flex justify-between border-b pb-2">
-                 <span>Масса (m):</span>
-                 <span className="font-bold">{selectedObject ? `${selectedObject.mass} г` : '?'}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                 <span>Бастапқы көлем (V1):</span>
-                 <span className="font-bold">50 мл</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                 <span>Соңғы көлем (V2):</span>
-                 <span className="font-bold">{inWater ? '60 мл' : '?'}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2 bg-indigo-50 p-2 rounded">
-                 <span>Дене көлемі (V = V2 - V1):</span>
-                 <span className="font-bold">{inWater ? '10 мл' : '?'}</span>
-              </div>
-           </div>
+        {/* Басқару және Есептеу */}
+        <div className="space-y-6">
+           {mode === 'learn' && step === 0 && (
+             <div className="grid grid-cols-3 gap-4">
+                {materials.map(m => (
+                  <button key={m.id} onClick={() => handleSelect(m)} className="p-4 bg-slate-50 border hover:border-indigo-500 rounded-xl transition text-center group">
+                     <div className="w-10 h-10 rounded mx-auto mb-2 shadow-sm group-hover:scale-110 transition" style={{ backgroundColor: m.color }}></div>
+                     <span className="font-bold text-slate-700 text-sm">{m.name}</span>
+                  </button>
+                ))}
+             </div>
+           )}
 
-           <div className="mb-4">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Тығыздықты есептеңіз (ρ = m/V):</label>
-              <div className="flex gap-2">
-                 <input 
-                   type="number" 
-                   value={userDensity}
-                   onChange={(e) => setUserDensity(e.target.value)}
-                   className="w-full p-3 rounded-lg border border-slate-300"
-                   placeholder="Мысалы: 2.5"
-                 />
-                 <span className="self-center font-bold text-slate-500">г/мл</span>
-              </div>
-           </div>
-
-           {!result ? (
-             <button onClick={checkAnswer} disabled={!inWater} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50">
-               Тексеру
-             </button>
-           ) : (
-             <div className={`p-4 rounded-xl text-center font-bold ${result === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {result === 'correct' ? (
-                   <div className="flex flex-col items-center gap-2">
-                      <CheckCircle2 size={32} />
-                      Дұрыс! {selectedObject.name} тығыздығы: {selectedObject.density} г/мл
-                   </div>
-                ) : 'Қате. Формуланы тексеріңіз: m / 10'}
+           {step > 0 && (
+             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center pb-2 border-b">
+                   <span className="text-slate-600">Ауадағы салмағы (m):</span>
+                   <span className="font-bold text-lg">{selectedObj.mass} г</span>
+                </div>
                 
-                <button onClick={() => { setSelectedObject(null); setInWater(false); setResult(null); setUserDensity(''); }} className="mt-4 text-sm underline flex items-center justify-center gap-1 mx-auto text-slate-600">
-                   <RefreshCw size={14}/> Жаңасын таңдау
-                </button>
+                {step === 2 && (
+                  <>
+                    <div className="flex justify-between items-center pb-2 border-b">
+                       <span className="text-slate-600">Судағы салмағы (P'):</span>
+                       <span className="font-bold text-lg">{getWeightInWater()} г</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-2 border-b bg-blue-50 p-2 rounded">
+                       <span className="text-blue-800 font-bold text-sm">Көлем (V = V2 - V1):</span>
+                       <span className="font-bold text-lg text-blue-900">{(selectedObj.mass / selectedObj.density).toFixed(1)} мл</span>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex gap-2 pt-4">
+                   {step === 1 ? (
+                     <button onClick={() => setStep(2)} className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl flex justify-center items-center gap-2">
+                        <ArrowDown size={18}/> Суға батыру
+                     </button>
+                   ) : (
+                     <div className="w-full space-y-4">
+                        {mode === 'mystery' ? (
+                          <div className="space-y-2">
+                             <p className="text-sm font-bold text-purple-900">Бұл қандай зат? (Тығыздықты есептеңіз)</p>
+                             <div className="flex gap-2">
+                                <input 
+                                  value={userGuess} 
+                                  onChange={e => setUserGuess(e.target.value)}
+                                  placeholder="ρ = m/V"
+                                  className="flex-1 p-2 border rounded-lg text-center"
+                                />
+                                <button onClick={() => {
+                                   if(Math.abs(Number(userGuess) - 8.9) < 0.5) setFeedback('correct');
+                                   else setFeedback('wrong');
+                                }} className="bg-purple-600 text-white px-4 rounded-lg font-bold">Тексеру</button>
+                             </div>
+                             {feedback && (
+                                <p className={`text-sm font-bold ${feedback==='correct' ? 'text-green-600' : 'text-red-500'}`}>
+                                   {feedback === 'correct' ? `Дұрыс! Бұл - ${mysteryObj.realName} (8.9 г/см³)` : 'Қате. Қайта есептеңіз (89 / 10).'}
+                                </p>
+                             )}
+                          </div>
+                        ) : (
+                          <div className="text-center p-4 bg-green-100 rounded-xl text-green-800">
+                             <p className="text-sm uppercase font-bold opacity-70">Есептелген тығыздық:</p>
+                             <p className="text-3xl font-bold">{selectedObj.density} <span className="text-lg">г/см³</span></p>
+                          </div>
+                        )}
+                        <button onClick={() => {setStep(0); setMode('learn'); setSelectedObj(null);}} className="w-full py-2 text-slate-400 hover:text-slate-600 font-bold">Басқа зат таңдау</button>
+                     </div>
+                   )}
+                </div>
              </div>
            )}
         </div>
-
       </div>
     </div>
   );
