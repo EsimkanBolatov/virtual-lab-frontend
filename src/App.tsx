@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+// ИМПОРТ НОВОГО КОМПОНЕНТА
+import HClExperiment from './components/experiments/HClExperiment';
+
 
 // ============= TYPES =============
 interface User {
@@ -8,21 +11,6 @@ interface User {
   full_name: string;
   role: 'student' | 'teacher';
   grade?: number;
-}
-
-interface Chemical {
-  id: string;
-  name: string;
-  label: string;
-  color: string;
-}
-
-interface Indicator {
-  id: string;
-  name: string;
-  neutral: string;
-  acid: string;
-  base: string;
 }
 
 interface Experiment {
@@ -150,7 +138,7 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
       return;
     }
 
-    // Симуляция - реалды жүйеде backend-пен байланыс болады
+    // Симуляция
     const user: User = {
       id: Date.now(),
       email: formData.email,
@@ -170,7 +158,6 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
         transition={{ type: "spring", duration: 0.8 }}
         className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden"
       >
-        {/* Animated Background */}
         <div className="absolute inset-0 opacity-5">
           {[...Array(20)].map((_, i) => (
             <motion.div
@@ -196,7 +183,6 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
         </div>
 
         <div className="relative z-10">
-          {/* Header */}
           <div className="text-center mb-8">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
@@ -213,7 +199,6 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
             </p>
           </div>
 
-          {/* Toggle */}
           <div className="flex mb-6 bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl p-1">
             <button
               onClick={() => setIsLogin(true)}
@@ -237,7 +222,6 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
             </button>
           </div>
 
-          {/* Error */}
           <AnimatePresence>
             {error && (
               <motion.div
@@ -251,7 +235,6 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
             )}
           </AnimatePresence>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
@@ -267,11 +250,8 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
                 />
               </div>
             )}
-
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                📧 Email
-              </label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">📧 Email</label>
               <input
                 type="email"
                 value={formData.email}
@@ -280,11 +260,8 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
                 placeholder="example@mail.com"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                🔒 Құпия сөз
-              </label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">🔒 Құпия сөз</label>
               <input
                 type="password"
                 value={formData.password}
@@ -293,13 +270,10 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
                 placeholder="••••••••"
               />
             </div>
-
             {!isLogin && (
               <>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    📚 Сынып
-                  </label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">📚 Сынып</label>
                   <select
                     value={formData.grade}
                     onChange={(e) => setFormData({...formData, grade: e.target.value})}
@@ -310,11 +284,8 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
                     ))}
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    🎭 Рөл
-                  </label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">🎭 Рөл</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
@@ -326,7 +297,6 @@ const AuthPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
                 </div>
               </>
             )}
-
             <motion.button
               type="submit"
               whileHover={{ scale: 1.02 }}
@@ -358,7 +328,6 @@ const HomePage: React.FC<{ user: User; onNavigate: (page: Page, subject?: string
         animate={{ opacity: 1 }}
         className="max-w-7xl mx-auto px-6 py-12"
       >
-        {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -372,7 +341,6 @@ const HomePage: React.FC<{ user: User; onNavigate: (page: Page, subject?: string
           </p>
         </motion.div>
 
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {[
             { label: 'Аяқталған', value: '12', icon: '✅', color: 'from-blue-500 to-blue-600' },
@@ -398,7 +366,6 @@ const HomePage: React.FC<{ user: User; onNavigate: (page: Page, subject?: string
           ))}
         </div>
 
-        {/* Subjects */}
         <div className="mb-12">
           <h2 className="text-4xl font-bold text-gray-800 mb-8">📚 Пәндер</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -427,7 +394,6 @@ const HomePage: React.FC<{ user: User; onNavigate: (page: Page, subject?: string
           </div>
         </div>
 
-        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -587,7 +553,6 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
 
               <div className="p-6">
                 <p className="text-gray-600 mb-4 text-lg">{exp.description}</p>
-
                 <div className="flex items-center justify-between mb-4">
                   <span className={`px-4 py-2 rounded-xl text-sm font-bold border-2 ${getDifficultyColor(exp.difficulty)}`}>
                     {exp.difficulty === 'easy' ? '🟢 Оңай' : exp.difficulty === 'medium' ? '🟡 Орташа' : '🔴 Қиын'}
@@ -596,12 +561,10 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
                     📚 {exp.grade}-сынып
                   </span>
                 </div>
-
                 <div className="flex items-center justify-between text-lg text-gray-500 mb-4">
                   <div>⏱ {exp.duration_minutes} мин</div>
                   <div>📋 {exp.type === 'lab' ? 'Зертхана' : 'Практика'}</div>
                 </div>
-
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -618,367 +581,12 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
   );
 };
 
-// ============= HCL EXPERIMENT =============
-const HClExperiment: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [step, setStep] = useState(1);
-  const [selectedAcid, setSelectedAcid] = useState<Chemical | null>(null);
-  const [selectedBase, setSelectedBase] = useState<Chemical | null>(null);
-  const [selectedIndicator, setSelectedIndicator] = useState<Indicator | null>(null);
-  const [beakerColor, setBeakerColor] = useState('transparent');
-  const [showReaction, setShowReaction] = useState(false);
-  const [score, setScore] = useState(0);
-  const [feedback, setFeedback] = useState('');
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [completed, setCompleted] = useState(false);
-
-  const chemicals = {
-    acids: [
-      { id: 'hcl', name: 'HCl', label: 'Тұз қышқылы', color: '#ffcccc' },
-      { id: 'h2so4', name: 'H₂SO₄', label: 'Күкірт қышқылы', color: '#ffe6cc' }
-    ],
-    bases: [
-      { id: 'naoh', name: 'NaOH', label: 'Натрий гидроксиді', color: '#ccf2ff' },
-      { id: 'koh', name: 'KOH', label: 'Калий гидроксиді', color: '#e6ccff' }
-    ],
-    indicators: [
-      { id: 'litmus', name: 'Лакмус', neutral: '#e8d5f2', acid: '#ff6b6b', base: '#4dabf7' },
-      { id: 'phenol', name: 'Фенолфталеин', neutral: 'transparent', acid: 'transparent', base: '#ff6b9d' }
-    ]
-  };
-
-  const showMessage = (msg: string) => {
-    setFeedback(msg);
-    setShowFeedback(true);
-    setTimeout(() => setShowFeedback(false), 2000);
-  };
-
-  const mixChemicals = () => {
-    if (!selectedAcid || !selectedBase) {
-      showMessage('⚠️ Қышқыл мен сілтіді таңдаңыз!');
-      return;
-    }
-
-    if (selectedAcid.id === 'hcl' && selectedBase.id === 'naoh') {
-      setScore(prev => prev + 50);
-      setBeakerColor('#b3d9ff');
-      setShowReaction(true);
-      showMessage('✅ Дұрыс! Бейтараптану жүріп жатыр');
-      setTimeout(() => setStep(2), 2000);
-    } else {
-      showMessage('❌ HCl және NaOH қажет');
-    }
-  };
-
-  const addIndicator = () => {
-    if (!selectedIndicator) {
-      showMessage('⚠️ Індикатор таңдаңыз!');
-      return;
-    }
-
-    setBeakerColor(selectedIndicator.neutral);
-    setScore(prev => prev + 30);
-    showMessage('✅ Индикатор қосылды!');
-    setTimeout(() => setStep(3), 1500);
-  };
-
-  const checkAnswer = (answer: string) => {
-    if (answer === 'correct') {
-      setScore(prev => prev + 20);
-      setCompleted(true);
-      showMessage('🎉 Керемет! Дұрыс жауап!');
-    } else {
-      showMessage('❌ Қате жауап');
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                🧪 Тұз қышқылының бейтараптану реакциясы
-              </h1>
-              <p className="text-gray-600 text-xl">7-сынып Химия • Зертханалық тәжірібе №8</p>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onBack}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg"
-            >
-              ← Артқа
-            </motion.button>
-          </div>
-          
-          <div className="flex gap-4">
-            <div className="bg-gradient-to-r from-green-400 to-green-600 px-6 py-3 rounded-xl text-white font-bold text-xl shadow-lg">
-              💎 Ұпай: {score}/100
-            </div>
-            <div className="bg-gradient-to-r from-blue-400 to-blue-600 px-6 py-3 rounded-xl text-white font-bold text-xl shadow-lg">
-              📍 Қадам: {step}/3
-            </div>
-          </div>
-        </div>
-
-        {/* Feedback Toast */}
-        <AnimatePresence>
-          {showFeedback && (
-            <motion.div
-              initial={{ opacity: 0, y: -50, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -50, scale: 0.8 }}
-              className="fixed top-24 right-8 bg-white shadow-2xl rounded-2xl p-6 z-50 border-l-4 border-blue-500"
-            >
-              <p className="text-gray-800 font-bold text-xl">{feedback}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="grid grid-cols-3 gap-6">
-          {/* Left Panel */}
-          <div className="col-span-1 space-y-6">
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-2xl shadow-2xl p-6"
-            >
-              <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                🔴 Қышқылдар
-              </h3>
-              {chemicals.acids.map(acid => (
-                <motion.button
-                  key={acid.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setSelectedAcid(acid);
-                    showMessage('✓ Қышқыл таңдалды!');
-                  }}
-                  className={`w-full p-6 mb-4 rounded-xl border-4 transition ${
-                    selectedAcid?.id === acid.id
-                      ? 'border-blue-500 bg-blue-50 shadow-xl'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                >
-                  <div className="text-4xl mb-2">{acid.name}</div>
-                  <div className="text-lg text-gray-600 font-semibold">{acid.label}</div>
-                </motion.button>
-              ))}
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-2xl p-6"
-            >
-              <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                🔵 Сілтілер
-              </h3>
-              {chemicals.bases.map(base => (
-                <motion.button
-                  key={base.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setSelectedBase(base);
-                    showMessage('✓ Сілті таңдалды!');
-                  }}
-                  className={`w-full p-6 mb-4 rounded-xl border-4 transition ${
-                    selectedBase?.id === base.id
-                      ? 'border-green-500 bg-green-50 shadow-xl'
-                      : 'border-gray-200 hover:border-green-300'
-                  }`}
-                >
-                  <div className="text-4xl mb-2">{base.name}</div>
-                  <div className="text-lg text-gray-600 font-semibold">{base.label}</div>
-                </motion.button>
-              ))}
-            </motion.div>
-
-            {step >= 2 && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white rounded-2xl shadow-2xl p-6"
-              >
-                <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                  🟣 Индикаторлар
-                </h3>
-                {chemicals.indicators.map(ind => (
-                  <motion.button
-                    key={ind.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setSelectedIndicator(ind);
-                      showMessage('✓ Индикатор таңдалды!');
-                    }}
-                    className={`w-full p-6 mb-4 rounded-xl border-4 transition ${
-                      selectedIndicator?.id === ind.id
-                        ? 'border-purple-500 bg-purple-50 shadow-xl'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <div className="text-2xl font-bold">{ind.name}</div>
-                  </motion.button>
-                ))}
-              </motion.div>
-            )}
-          </div>
-
-          {/* Center Panel - Lab */}
-          <div className="col-span-2 bg-white rounded-2xl shadow-2xl p-8">
-            <h3 className="text-3xl font-bold mb-8 text-gray-800">🔬 Виртуалды зертхана</h3>
-            
-            <div className="flex justify-center items-end h-96 relative bg-gradient-to-b from-blue-50 to-transparent rounded-2xl p-8">
-              {/* Beaker */}
-              <motion.div
-                className="relative"
-                animate={{ scale: showReaction ? [1, 1.05, 1] : 1 }}
-                transition={{ repeat: showReaction ? Infinity : 0, duration: 1 }}
-              >
-                <div className="w-64 h-80 border-8 border-gray-400 rounded-b-[3rem] bg-gradient-to-b from-transparent to-gray-50 relative overflow-hidden shadow-2xl">
-                  <motion.div
-                    className="absolute bottom-0 w-full transition-all duration-1000"
-                    style={{ 
-                      height: selectedAcid && selectedBase ? '80%' : '0%',
-                      backgroundColor: beakerColor 
-                    }}
-                    animate={{
-                      opacity: showReaction ? [0.7, 1, 0.7] : 1
-                    }}
-                    transition={{ repeat: showReaction ? Infinity : 0, duration: 2 }}
-                  />
-                  
-                  {/* Measurement lines */}
-                  {[25, 50, 75].map((pos) => (
-                    <div key={pos} className={`absolute left-0 w-12 h-1 bg-gray-400`} style={{top: `${pos}%`}}></div>
-                  ))}
-                </div>
-                <div className="text-center mt-4 text-gray-600 font-bold text-xl">🧪 Стакан</div>
-              </motion.div>
-
-              {/* Bubbles */}
-              {showReaction && (
-                <div className="absolute inset-0 pointer-events-none">
-                  {[...Array(15)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute w-4 h-4 bg-white rounded-full opacity-60 shadow-lg"
-                      initial={{ x: 320 + Math.random() * 100, y: 350 }}
-                      animate={{ 
-                        y: -100,
-                        x: 320 + Math.random() * 100 + (Math.random() - 0.5) * 100
-                      }}
-                      transition={{
-                        duration: 2 + Math.random(),
-                        repeat: Infinity,
-                        delay: i * 0.15
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-8 space-y-4">
-              {step === 1 && (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={mixChemicals}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-6 rounded-2xl text-2xl shadow-2xl hover:shadow-3xl"
-                >
-                  ⚗️ Қышқыл мен сілтіді араластыру
-                </motion.button>
-              )}
-
-              {step === 2 && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={addIndicator}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-6 rounded-2xl text-2xl shadow-2xl"
-                >
-                  💧 Индикатор қосу
-                </motion.button>
-              )}
-
-              {step === 3 && !completed && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-4"
-                >
-                  <h4 className="text-2xl font-bold text-gray-800 mb-4">📝 Реакция теңдеуін таңдаңыз:</h4>
-                  {[
-                    { text: 'HCl + NaOH → NaCl + H₂O', correct: true },
-                    { text: 'HCl + NaOH → Na₂O + H₂', correct: false },
-                    { text: 'HCl + NaOH → NaClO + H₂O', correct: false }
-                  ].map((option, i) => (
-                    <motion.button
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      whileHover={{ scale: 1.02, x: 10 }}
-                      onClick={() => checkAnswer(option.correct ? 'correct' : 'wrong')}
-                      className="w-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-green-100 hover:to-green-200 text-gray-800 font-bold py-5 rounded-2xl border-4 border-gray-300 hover:border-green-400 text-xl"
-                    >
-                      {option.text}
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-
-              {completed && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 text-white p-10 rounded-3xl text-center shadow-2xl"
-                >
-                  <div className="text-8xl mb-4">🎉</div>
-                  <h3 className="text-4xl font-bold mb-4">Тамаша!</h3>
-                  <p className="text-2xl mb-2">Тәжірибе сәтті аяқталды!</p>
-                  <p className="text-3xl font-bold mt-4">Қорытынды ұпай: {score}/100</p>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Reaction Equation */}
-            {showReaction && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-8 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-4 border-yellow-300 rounded-2xl"
-              >
-                <p className="text-center text-2xl font-mono text-gray-800 font-bold">
-                  HCl + NaOH → ?
-                </p>
-                <p className="text-center text-lg text-gray-600 mt-2">
-                  ⚗️ Реакция жүріп жатыр...
-                </p>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // ============= MAIN APP =============
 const App: React.FC = () => {
   const { user, isAuthenticated, login, logout } = useAuthStore();
   const [currentPage, setCurrentPage] = useState<Page>('auth');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
+
   useEffect(() => {
     if (isAuthenticated) {
       setCurrentPage('home');
@@ -992,8 +600,6 @@ const App: React.FC = () => {
       setSelectedSubject(typeof param === 'string' ? param : '');
       setCurrentPage('experiments');
     } else if (page === 'experiment-detail') {
-      // Болашақта experiment ID бойынша динамикалық контент көрсету үшін
-      // Қазір барлық experiments HCl экспериментін көрсетеді
       setCurrentPage('experiment-detail');
     } else {
       setCurrentPage(page);
@@ -1054,7 +660,16 @@ const App: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                 >
-                  <HClExperiment onBack={() => handleNavigate('experiments')} />
+                  {/* КНОПКА НАЗАД И НОВЫЙ КОМПОНЕНТ */}
+                  <div className="max-w-7xl mx-auto px-6 py-8">
+                    <button 
+                       onClick={() => handleNavigate('experiments')}
+                       className="mb-4 flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors font-bold px-4 py-2 bg-white rounded-lg shadow-sm"
+                    >
+                       <span>←</span> Артқа
+                    </button>
+                    <HClExperiment />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

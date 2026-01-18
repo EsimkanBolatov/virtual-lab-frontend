@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, RefreshCw, FlaskConical, Droplets, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowRight, RefreshCw, FlaskConical, Droplets, CheckCircle2} from 'lucide-react';
 
 // Типы для состояния эксперимента
 type Step = 'selection' | 'indicator' | 'titration' | 'result';
@@ -67,7 +67,7 @@ const HClExperiment: React.FC = () => {
 
       {/* Индикатор прогресса */}
       <div className="flex gap-2 mb-8 mt-12">
-        {['Реагенттер', 'Индикатор', 'Тәжірибе', 'Нәтиже'].map((s, idx) => {
+        {['Реагенттер', 'Индикатор', 'Тәжірибе', 'Нәтиже'].map((_, idx) => {
           const steps: Step[] = ['selection', 'indicator', 'titration', 'result'];
           const isActive = steps.indexOf(step) >= idx;
           return (
