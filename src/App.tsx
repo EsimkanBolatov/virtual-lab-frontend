@@ -9,7 +9,8 @@ import IonRecognitionExperiment from './components/experiments/IonRecognitionExp
 import FoodAnalysisExperiment from './components/experiments/FoodAnalysisExperiment';
 import PhaseChangeExperiment from './components/experiments/PhaseChangeExperiment';
 import ProteinDenaturationExperiment from './components/experiments/ProteinDenaturationExperiment';
-import SubstancePropertiesExperiment from './components/experiments/SubstancePropertiesExperiment'; // ЖАҢА
+import SubstancePropertiesExperiment from './components/experiments/SubstancePropertiesExperiment';
+import BoneStructureExperiment from './components/experiments/BoneStructureExperiment'; // ЖАҢА
 
 // ============= TYPES =============
 interface User {
@@ -326,7 +327,7 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [filter, setFilter] = useState(selectedSubject || '');
 
-  // ЭКСПЕРИМЕНТТЕР ТІЗІМІ (БАРЛЫҒЫ 8)
+  // ЭКСПЕРИМЕНТТЕР ТІЗІМІ (БАРЛЫҒЫ 9)
   const experiments: Experiment[] = [
     { id: 1, title: 'Тұз қышқылының бейтараптану реакциясы', subject: 'chemistry', grade: 7, description: 'HCl және NaOH бейтараптану реакциясы', type: 'lab', difficulty: 'easy', duration_minutes: 20 },
     { id: 2, title: 'Ерітінділер дайындау', subject: 'chemistry', grade: 8, description: 'Пайыздық концентрациясы берілген ерітіндіні дайындау', type: 'practical', difficulty: 'medium', duration_minutes: 30 },
@@ -336,6 +337,7 @@ const ExperimentsListPage: React.FC<{ onNavigate: (page: Page, id?: number) => v
     { id: 6, title: 'Фазалық өзгерістер', subject: 'science', grade: 6, description: 'Судың агрегаттық күйлерінің өзгеруі (мұз, су, бу)', type: 'lab', difficulty: 'easy', duration_minutes: 15 },
     { id: 7, title: 'Нәруыздар денатурациясы', subject: 'biology', grade: 10, description: 'Температура мен pH-тың нәруыз құрылымына әсері', type: 'lab', difficulty: 'hard', duration_minutes: 35 },
     { id: 8, title: 'Заттардың қасиеттері', subject: 'science', grade: 5, description: 'Қаттылық, ерігіштік және серпімділік қасиеттерін зерттеу', type: 'practical', difficulty: 'easy', duration_minutes: 15 },
+    { id: 9, title: 'Сүйек құрылысы', subject: 'biology', grade: 8, description: 'Сүйектің макро және микроскопиялық құрылымын зерттеу', type: 'lab', difficulty: 'medium', duration_minutes: 25 },
   ];
 
   const filtered = experiments.filter(exp => {
@@ -450,7 +452,7 @@ const App: React.FC = () => {
     setCurrentPage('auth');
   };
 
-  // ЭКСПЕРИМЕНТТІ ТАҢДАУ ЛОГИКАСЫ
+  // ЭКСПЕРИМЕНТТІ ТАҢДАУ ЛОГИКАСЫ (Барлық 9 жұмыс)
   const renderExperiment = () => {
     switch (selectedExperimentId) {
       case 1: return <HClExperiment onBack={() => handleNavigate('experiments')} />;
@@ -461,6 +463,7 @@ const App: React.FC = () => {
       case 6: return <PhaseChangeExperiment onBack={() => handleNavigate('experiments')} />;
       case 7: return <ProteinDenaturationExperiment onBack={() => handleNavigate('experiments')} />;
       case 8: return <SubstancePropertiesExperiment onBack={() => handleNavigate('experiments')} />;
+      case 9: return <BoneStructureExperiment onBack={() => handleNavigate('experiments')} />;
       default: return <div className="text-center p-10 text-xl font-bold text-gray-500">Бұл тәжірибе әзірлену үстінде... 🚧</div>;
     }
   };
